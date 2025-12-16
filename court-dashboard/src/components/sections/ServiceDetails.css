@@ -1,0 +1,158 @@
+.service-details {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.service-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.service-title-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.service-details-icon {
+  font-size: 3rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 10px;
+  color: #667eea;
+}
+
+.service-details h2 {
+  color: #2d3748;
+  margin-bottom: 5px;
+  font-size: 1.5rem;
+}
+
+.service-description {
+  color: #718096;
+  font-size: 0.95rem;
+}
+
+.start-service-btn {
+  padding: 12px 30px;
+  background: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.start-service-btn:hover {
+  background: #38a169;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.service-requirements {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.service-requirements h3,
+.service-instructions h3 {
+  color: #2d3748;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.service-requirements h3::before {
+  content: "📋";
+}
+
+.service-instructions h3::before {
+  content: "📝";
+}
+
+.service-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.service-requirements li {
+  padding: 10px 0;
+  color: #4a5568;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.service-requirements li:last-child {
+  border-bottom: none;
+}
+
+.service-requirements li::before {
+  content: "✅";
+  font-size: 0.9rem;
+}
+
+.service-instructions {
+  padding: 20px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.service-instructions ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.service-instructions li {
+  padding: 10px 0;
+  color: #4a5568;
+  line-height: 1.6;
+  counter-increment: step-counter;
+}
+
+.service-instructions li::marker {
+  color: #667eea;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .service-details-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .service-title-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .start-service-btn {
+    width: 100%;
+  }
+
+  .service-requirements,
+  .service-instructions {
+    padding: 15px;
+  }
+}
