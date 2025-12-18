@@ -37,14 +37,14 @@ function App() {
     },
     { 
       id: 4, 
-      name: 'Fee Payment', 
-      icon: '💳', 
+      name: 'መዝገብ መከታተያ', 
+      icon: '🔍', 
       description: 'Pay court fees online',
       requirements: ['Case Number', 'Payment Amount']
     },
     { 
       id: 5, 
-      name: 'Hearing Schedule', 
+      name: 'የዕለት ቀጠሮ', 
       icon: '📅', 
       description: 'View hearing dates',
       requirements: ['Case Number']
