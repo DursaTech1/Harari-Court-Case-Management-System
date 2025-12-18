@@ -1,37 +1,38 @@
 .services-sidebar {
   width: 280px;
-  background: white;
+  background: #235467;
   border-right: 1px solid #e2e8f0;
   padding: 20px;
   overflow-y: auto;
 }
 
 .sidebar-title {
-  color: #2d3748;
-  font-size: 1.2rem;
+  color: #FFFFFF;
+  font-size: 1.5rem;
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #FFFFFF;
 }
 
 .services-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 18px;
 }
 
 .service-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 15px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  padding: 25px 15px;
+  background: #FFFFFF;
+  border: 1px solid #235467;
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
   transition: all 0.3s;
 }
+
 
 .service-item:hover {
   background: #f8fafc;
@@ -58,8 +59,8 @@
 
 .service-item-name {
   flex: 1;
-  font-size: 0.95rem;
-  color: #4a5568;
+  font-size: 1.3rem;
+  color: #000;
   font-weight: 500;
 }
 

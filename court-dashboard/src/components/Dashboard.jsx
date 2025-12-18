@@ -1,193 +1,107 @@
 import React, { useState, useEffect } from 'react';
 import ServicesSidebar from './sections/ServicesSidebar';
 import ServiceDetails from './sections/ServiceDetails';
-import MyCasesSection from './sections/MyCasesSection';
-import NotificationsSection from './sections/NotificationsSection';
+import CaseAnalytics from './sections/CaseAnalytics';
 import './Dashboard.css';
 
-const Dashboard = ({ userData, onLogout, courtServices, userCases, notifications }) => {
+const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const timeInterval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timeInterval);
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleServiceSelect = (service) => {
-    setSelectedService(service);
-  };
-
-  const handleServiceAction = (action) => {
-    alert(`Starting ${action} process... Please follow the instructions.`);
-  };
-
   const quickStats = {
-    activeCases: 2,
+    activeCases: userCases?.length || 0,
     pendingPayments: 1,
     upcomingHearings: 2,
     unreadMessages: 1
   };
 
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
   return (
     <div className="dashboard-app">
+      {/* Header */}
       <header className="dashboard-header">
-        <div className="dashboard-header-left">
-          <div className="dashboard-logo">
-            <div className="dashboard-court-icon">⚖️</div>
-            <div className="dashboard-logo-text">
-              <span className="dashboard-logo-main">Harari Court</span>
-              <span className="dashboard-logo-sub">Services Portal</span>
+        <div className="header-left">
+          <div className="logo">
+            <span className="icon">⚖️</span>
+            <div>
+              <h2>Harari Court</h2>
+              <span>Services Portal</span>
             </div>
           </div>
-          <div className="dashboard-time">
-            <span className="date">{currentTime.toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</span>
-            <span className="time">{formatTime(currentTime)}</span>
+          <div className="time-box">
+            <span>{currentTime.toLocaleDateString()}</span>
+            <strong>{currentTime.toLocaleTimeString()}</strong>
           </div>
         </div>
 
-        <div className="dashboard-header-center">
-          <h1>Court Services Dashboard</h1>
-          <p className="welcome-msg">Welcome, {userData?.fullName}!</p>
-        </div>
-
-        <div className="dashboard-header-right">
+        <div className="header-right">
           <div className="user-info">
-            <div className="user-details">
-              <span className="user-name">{userData?.fullName}</span>
-              <span className="user-id">ID: {userData?.userId}</span>
-            </div>
-            <button className="logout-btn" onClick={onLogout}>
-              Logout
-            </button>
+            <strong>{userData?.fullName}</strong>
+            <span>ID: {userData?.userId}</span>
           </div>
+          <button className="logout-btn" onClick={onLogout}>
+            Logout
+          </button>
         </div>
       </header>
 
+      {/* Main */}
       <main className="dashboard-main">
-        <ServicesSidebar 
+        <ServicesSidebar
           courtServices={courtServices}
           selectedService={selectedService}
-          onServiceSelect={handleServiceSelect}
+          onServiceSelect={setSelectedService}
           quickStats={quickStats}
         />
 
-        <div className="dashboard-content">
+        <section className="dashboard-content">
           {selectedService ? (
-            <ServiceDetails 
+            <ServiceDetails
               service={selectedService}
-              onStartService={handleServiceAction}
+              onStartService={() =>
+                alert(`Starting ${selectedService.name} process...`)
+              }
             />
           ) : (
-            <WelcomeSection 
+            <WelcomeSection
+              userData={userData}
               courtServices={courtServices}
-              onServiceSelect={handleServiceSelect}
+              onServiceSelect={setSelectedService}
             />
           )}
-
-          <MyCasesSection 
-            userCases={userCases}
-            onViewAll={() => handleServiceSelect(courtServices[1])}
-          />
-
-          <NotificationsSection notifications={notifications} />
-        </div>
+        </section>
       </main>
 
+      {/* Footer */}
       <footer className="dashboard-footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h4>Support</h4>
-            <p>Help Center</p>
-            <p>Contact Support</p>
-            <p>FAQ</p>
-          </div>
-          <div className="footer-section">
-            <h4>Legal</h4>
-            <p>Terms of Service</p>
-            <p>Privacy Policy</p>
-            <p>Court Rules</p>
-          </div>
-          <div className="footer-section">
-            <h4>Contact</h4>
-            <p>Email: support@hararicourt.gov.et</p>
-            <p>Phone: +251-25-666-1000</p>
-            <p>Emergency: +251-911-123456</p>
-          </div>
-          <div className="footer-section">
-            <h4>System Status</h4>
-            <div className="status-indicator">
-              <span className="status-dot online"></span>
-              <span>All Systems Operational</span>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>© 2024 Harari Region Supreme Court Services Portal | User: {userData?.userId}</p>
-        </div>
+        <p>© 2024 Harari Region Supreme Court — User: {userData?.userId}</p>
       </footer>
     </div>
   );
 };
 
-const WelcomeSection = ({ courtServices, onServiceSelect }) => (
-  <div className="welcome-section">
-    <h2>Welcome to Your Dashboard</h2>
-    <p className="welcome-text">
-      Select a service from the sidebar to get started. You can file new cases, 
-      check case status, submit documents, make payments, and access other 
-      court services.
-    </p>
-    
-    <div className="quick-actions">
-      <h3>Quick Actions</h3>
-      <div className="quick-actions-grid">
-        <button 
-          className="quick-action-btn"
-          onClick={() => onServiceSelect(courtServices[0])}
+const WelcomeSection = ({ userData, courtServices, onServiceSelect }) => (
+  <div className="welcome-card">
+    <h1>Welcome, {userData?.fullName}</h1>
+    <p>Select a service below to get started.</p>
+
+    <div className="services-grid">
+      {courtServices?.map(service => (
+        <div
+          key={service.id}
+          className="service-card"
+          onClick={() => onServiceSelect(service)}
         >
-          <span>📄</span>
-          File New Case
-        </button>
-        <button 
-          className="quick-action-btn"
-          onClick={() => onServiceSelect(courtServices[1])}
-        >
-          <span>📊</span>
-          Check Case Status
-        </button>
-        <button 
-          className="quick-action-btn"
-          onClick={() => onServiceSelect(courtServices[3])}
-        >
-          <span>💳</span>
-          Make Payment
-        </button>
-        <button 
-          className="quick-action-btn"
-          onClick={() => onServiceSelect(courtServices[4])}
-        >
-          <span>📅</span>
-          View Schedule
-        </button>
-      </div>
+          <h3>{service.name}</h3>
+          <p>{service.description}</p>
+        </div>
+      ))}
     </div>
+    
   </div>
 );
 
