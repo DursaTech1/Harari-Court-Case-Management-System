@@ -18,20 +18,7 @@ const ServicesSidebar = ({ courtServices, selectedService, onServiceSelect, quic
         ))}
       </div>
       
-      <div className="quick-stats">
-        <h3 className="stats-title">Quick Stats</h3>
-        <div className="stats-grid">
-          <div className="stat-item">
-            <span className="stat-number">{quickStats.activeCases}</span>
-            <span className="stat-label">Active Cases</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">{quickStats.upcomingHearings}</span>
-            <span className="stat-label">Upcoming Hearings</span>
-          </div>
-          
-        </div>
-      </div>
+      
     </aside>
   );
 };
