@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './LoginModal.css';
+import { loginUser } from '../../api/api';
 
 const LoginModal = ({ onClose, onSubmit, onSwitchToRegister }) => {
   const [formData, setFormData] = useState({
@@ -15,9 +16,24 @@ const LoginModal = ({ onClose, onSubmit, onSwitchToRegister }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData.email);
+
+    try {
+      const data = await loginUser({
+        email: formData.email,
+        password: formData.password
+      });
+
+      // store JWT token
+      localStorage.setItem('token', data.access);
+
+      // KEEP EXISTING FLOW
+      onSubmit(formData.email);
+
+    } catch (error) {
+      alert('Invalid email or password');
+    }
   };
 
   return (

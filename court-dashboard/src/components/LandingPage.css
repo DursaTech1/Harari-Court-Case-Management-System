@@ -588,13 +588,13 @@
   font-size: 18px;
 }
 
-.process-steps {
+.proces-steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
 }
 
-.process-step {
+.proces-step {
   background: #f8fafc;
   border-radius: 15px;
   padding: 30px;
@@ -603,7 +603,7 @@
   transition: all 0.3s;
 }
 
-.process-step:hover {
+.proces-step:hover {
   border-color: #235467;
   transform: translateY(-5px);
 }

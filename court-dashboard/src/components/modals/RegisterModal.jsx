@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './RegisterModal.css';
+import { registerUser } from '../../api/api';
 
 const RegisterModal = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const RegisterModal = ({ onClose, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -26,15 +27,27 @@ const RegisterModal = ({ onClose, onSubmit }) => {
       return;
     }
 
-    const user = {
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      userId: 'HCU-' + Math.floor(100000 + Math.random() * 900000),
-      registrationDate: new Date().toLocaleDateString()
-    };
-    
-    onSubmit(user);
+    try {
+      await registerUser({
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password
+      });
+
+      // KEEP EXISTING CALLBACK STRUCTURE
+      onSubmit({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone
+      });
+
+      alert('Account created successfully');
+      onClose();
+
+    } catch (error) {
+      alert('Registration failed. Email may already exist.');
+    }
   };
 
   return (

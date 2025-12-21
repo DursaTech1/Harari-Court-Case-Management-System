@@ -1,12 +1,25 @@
+//ServicesSidebar.jsx
+
 import React from 'react';
 import './ServicesSidebar.css';
 
-const ServicesSidebar = ({ courtServices, selectedService, onServiceSelect, quickStats }) => {
+const ServicesSidebar = ({ selectedService, onServiceSelect }) => {
+  // Filter or define services based on your needs
+  const services = [
+    { id: 1, name: 'Document Submission', icon: '📄' },
+    { id: 2, name: 'Arbitration Fee', icon: '💰' },
+    { id: 3, name: 'Search Document', icon: '🔍' },
+    { id: 4, name: 'Daily Appointment', icon: '📅' },
+    { id: 5, name: 'Complaint Form', icon: '📝' },
+    { id: 6, name: 'FeedBack', icon: '💬' },
+    
+  ];
+
   return (
     <aside className="services-sidebar">
       <h2 className="sidebar-title">Court Services</h2>
       <div className="services-list">
-        {courtServices.map(service => (
+        {services.map(service => (
           <button
             key={service.id}
             className={`service-item ${selectedService?.id === service.id ? 'active' : ''}`}
@@ -17,8 +30,6 @@ const ServicesSidebar = ({ courtServices, selectedService, onServiceSelect, quic
           </button>
         ))}
       </div>
-      
-      
     </aside>
   );
 };

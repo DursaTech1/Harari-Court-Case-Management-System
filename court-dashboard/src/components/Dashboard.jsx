@@ -3,11 +3,13 @@ import ServicesSidebar from './sections/ServicesSidebar';
 import ServiceDetails from './sections/ServiceDetails';
 import CaseAnalytics from './sections/CaseAnalytics';
 import './Dashboard.css';
+import { fetchDashboardData } from '../api/api';
 
-const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
+const Dashboard = ({ userData, onLogout, userCases }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [viewMode, setViewMode] = useState('dashboard'); // 'dashboard', 'analytics', 'profile'
+  const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -15,12 +17,77 @@ const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
   }, []);
 
   const quickStats = {
-    activeCases: userCases?.length || 0,
-    pendingPayments: 1,
-    upcomingHearings: 2,
-    unreadMessages: 1,
-    completedServices: 3
+  activeCases: dashboardData?.active_cases ?? userCases?.length ?? 0,
+  pendingPayments: dashboardData?.pending_payments ?? 0,
+  upcomingHearings: dashboardData?.upcoming_hearings ?? 0,
+  unreadMessages: dashboardData?.unread_messages ?? 0,
+  completedServices: dashboardData?.completed_services ?? 0
+};
+useEffect(() => {
+  const loadDashboard = async () => {
+    try {
+      const data = await fetchDashboardData();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Failed to load dashboard data');
+    }
   };
+
+  loadDashboard();
+}, []);
+
+
+  // Define services here for the WelcomeSection grid
+  const allServices = [
+    { 
+      id: 1, 
+      name: 'Document Submission', 
+      icon: '📄',
+      description: 'Submit legal documents electronically',
+      tags: ['Digital', 'Official'],
+      duration: '15-30 mins'
+    },
+    { 
+      id: 2, 
+      name: 'Arbitration Fee', 
+      icon: '💰',
+      description: 'Pay arbitration and court fees online',
+      tags: ['Payment', 'Required'],
+      duration: '10-15 mins'
+    },
+    { 
+      id: 3, 
+      name: 'Search Document', 
+      icon: '🔍',
+      description: 'Search and retrieve court documents',
+      tags: ['Search', 'Records'],
+      duration: '5-20 mins'
+    },
+    { 
+      id: 4, 
+      name: 'Daily Appointment', 
+      icon: '📅',
+      description: 'Schedule appointments with court officials',
+      tags: ['Booking', 'Schedule'],
+      duration: '10-20 mins'
+    },
+    { 
+      id: 5, 
+      name: 'Complaint Form', 
+      icon: '📝',
+      description: 'File official complaints or grievances',
+      tags: ['Form', 'Legal'],
+      duration: '20-40 mins'
+    },
+    { 
+      id: 6, 
+      name: 'FeedBack', 
+      icon: '💬',
+      description: 'Provide feedback on court services',
+      tags: ['Feedback', 'Review'],
+      duration: '5-15 mins'
+    }
+  ];
 
   return (
     <div className="dashboard-app">
@@ -66,9 +133,13 @@ const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
             <button className="header-btn" onClick={() => setViewMode('analytics')}>
               📊 Analytics
             </button>
-            <button className="logout-btn" onClick={onLogout}>
+           <button
+              className="logout-btn"
+              onClick={() => window.location.href = "/logout"}
+            >
               Logout
             </button>
+
           </div>
         </div>
       </header>
@@ -76,21 +147,18 @@ const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
       {/* Main */}
       <main className="dashboard-main">
         <ServicesSidebar
-          courtServices={courtServices}
           selectedService={selectedService}
           onServiceSelect={setSelectedService}
-          quickStats={quickStats}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
         />
 
         <section className="dashboard-content">
           {viewMode === 'analytics' ? (
             <CaseAnalytics 
-              userCases={userCases}
+              userCases={dashboardData?.cases || userCases}
               quickStats={quickStats}
               userData={userData}
             />
+
           ) : selectedService ? (
             <ServiceDetails
               service={selectedService}
@@ -102,7 +170,7 @@ const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
           ) : (
             <WelcomeSection
               userData={userData}
-              courtServices={courtServices}
+              allServices={allServices}
               onServiceSelect={setSelectedService}
               quickStats={quickStats}
             />
@@ -126,7 +194,7 @@ const Dashboard = ({ userData, onLogout, courtServices, userCases }) => {
   );
 };
 
-const WelcomeSection = ({ userData, courtServices, onServiceSelect, quickStats }) => (
+const WelcomeSection = ({ userData, allServices, onServiceSelect, quickStats }) => (
   <div className="welcome-container">
     <div className="welcome-header">
       <h1>Welcome back, {userData?.fullName}!</h1>
@@ -171,7 +239,7 @@ const WelcomeSection = ({ userData, courtServices, onServiceSelect, quickStats }
       <p className="section-description">Select a service to begin or learn more</p>
       
       <div className="services-grid">
-        {courtServices?.map(service => (
+        {allServices?.map(service => (
           <div
             key={service.id}
             className="service-card"
@@ -187,7 +255,7 @@ const WelcomeSection = ({ userData, courtServices, onServiceSelect, quickStats }
             </div>
             <div className="service-footer">
               <span className="service-duration">⏱️ {service.duration || '15-30 mins'}</span>
-              <button className="service-select-btn">Select →</button>
+              <button className="service-select-btn">Select </button>
             </div>
           </div>
         ))}

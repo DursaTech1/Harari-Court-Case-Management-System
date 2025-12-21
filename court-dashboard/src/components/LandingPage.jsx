@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
+import { fetchCourtServices } from '../api/api';
 
 const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -7,6 +8,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeService, setActiveService] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
 
   // Update time every second
   useEffect(() => {
@@ -14,6 +16,17 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        const data = await fetchCourtServices();
+        setCourtServices(data);
+      } catch (err) {
+        console.error('Failed to load services', err);
+      }
+    };
+    loadServices();
   }, []);
 
   // Categories based on your services
@@ -165,16 +178,16 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
             <p>Simple steps to access court services online</p>
           </div>
           
-          <div className="process-steps">
-            <div className="process-step">
+          <div className="proces-steps">
+            
+            <div className="proces-step">
               <div className="step-number">1</div>
               <div className="step-content">
                 <h3>Register Account</h3>
                 <p>Create your secure court portal account</p>
               </div>
             </div>
-            
-            <div className="process-step">
+            <div className="proces-step">
               <div className="step-number">2</div>
               <div className="step-content">
                 <h3>Select Service</h3>
@@ -182,7 +195,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
               </div>
             </div>
             
-            <div className="process-step">
+            <div className="proces-step">
               <div className="step-number">3</div>
               <div className="step-content">
                 <h3>Complete Process</h3>
@@ -190,7 +203,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
               </div>
             </div>
             
-            <div className="process-step">
+            <div className="proces-step">
               <div className="step-number">4</div>
               <div className="step-content">
                 <h3>Track Progress</h3>
