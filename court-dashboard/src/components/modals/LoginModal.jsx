@@ -55,7 +55,7 @@ const LoginModal = ({ onClose, onSubmit, onSwitchToRegister }) => {
           
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
-              <label>Email Address *</label>
+              <label>Email Address </label>
               <input 
                 type="email" 
                 name="email"
@@ -66,7 +66,7 @@ const LoginModal = ({ onClose, onSubmit, onSwitchToRegister }) => {
               />
             </div>
             <div className="form-group">
-              <label>Password *</label>
+              <label>Password </label>
               <input 
                 type="password" 
                 name="password"
