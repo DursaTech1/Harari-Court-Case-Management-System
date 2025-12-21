@@ -1,3 +1,5 @@
+// LandingPage.jsx - Updated with new sections
+
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
 import { fetchCourtServices } from '../api/api';
@@ -8,7 +10,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeService, setActiveService] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  
+  const [courtServicesData, setCourtServicesData] = useState(courtServices || []);
 
   // Update time every second
   useEffect(() => {
@@ -17,11 +19,12 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
   useEffect(() => {
     const loadServices = async () => {
       try {
         const data = await fetchCourtServices();
-        setCourtServices(data);
+        setCourtServicesData(data);
       } catch (err) {
         console.error('Failed to load services', err);
       }
@@ -29,23 +32,15 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
     loadServices();
   }, []);
 
-  // Categories based on your services
-  const categories = ['all', 'filing', 'status', 'documents', 'payments', 'hearing', 'legal', 'appeal'];
+  
 
-  // Filter services
-  const filteredServices = courtServices.filter(service => {
-    const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                           (selectedCategory === 'filing' && service.name.includes('Filing')) ||
-                           (selectedCategory === 'status' && service.name.includes('Status')) ||
-                           (selectedCategory === 'documents' && service.name.includes('Document')) ||
-                           (selectedCategory === 'payments' && service.name.includes('Payment')) ||
-                           (selectedCategory === 'hearing' && service.name.includes('Hearing')) ||
-                           (selectedCategory === 'legal' && service.name.includes('Legal')) ||
-                           (selectedCategory === 'appeal' && service.name.includes('Appeal'));
-    return matchesSearch && matchesCategory;
-  });
+  // Important announcements
+  const announcements = [
+    { id: 1, title: "New E-Filing System Launch", date: "2024-03-15", description: "Complete digital filing now available for all case types" },
+    { id: 2, title: "Court Holiday Schedule", date: "2024-03-10", description: "Upcoming court closures and working hours" },
+    { id: 3, title: "Privacy Policy Update", date: "2024-03-05", description: "Updated data protection and privacy regulations" },
+    { id: 4, title: "Mobile App Beta Testing", date: "2024-02-28", description: "Join our mobile application beta testing program" },
+  ];
 
   // Format time and date
   const formatTime = (date) => {
@@ -76,8 +71,6 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
     setActiveService(null);
   };
 
-
-
   return (
     <div className="landing-page">
       {/* Navigation */}
@@ -100,7 +93,11 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
             <span></span>
           </button>
 
-          <div className={`nav-right ${showMobileMenu ? 'show' : ''}`}>          
+          <div className={`nav-right ${showMobileMenu ? 'show' : ''}`}>
+            <div className="nav-actions">
+
+            </div>
+            
             <div className="nav-clock">
               <div className="clock-icon">🕐</div>
               <div className="clock-content">
@@ -129,91 +126,130 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
             
             <div className="hero-actions">
               <button className="hero-action-btn primary-btn" onClick={onOpenRegister}>
-                Get Started
-                
+                <span>🚀</span> Get Started
               </button>
               <button className="hero-action-btn secondary-btn" onClick={onOpenLogin}>
-                Explore Services
+                <span>🔍</span> Explore Services
               </button>
             </div>
             
-            
+            <div className="hero-stats">
+              <div className="stat-item">
+                <div className="stat-icon">⚖️</div>
+                <div className="stat-value">15,000+</div>
+                <div className="stat-label">Cases Processed</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">👥</div>
+                <div className="stat-value">50,000+</div>
+                <div className="stat-label">Registered Users</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">📄</div>
+                <div className="stat-value">98%</div>
+                <div className="stat-label">Digital Transactions</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon">⏱️</div>
+                <div className="stat-value">60%</div>
+                <div className="stat-label">Faster Processing</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* About Us Section */}
+      <section className="about-section">
+        <div className="about-container">
+          <div className="about-header">
+            <h2 className="about-title">About Harari Court</h2>
+            <div className="about-tag">Our Mission & Vision</div>
+          </div>
+          
+          <div className="about-content">
+            <div className="about-text">
+              <h3>የሀረሪ ፍርድ ቤት </h3>
+              <p>
+                The Harari Region Supreme Court is committed to delivering accessible, efficient, 
+                and transparent judicial services through digital innovation. As a pioneer in 
+                Ethiopia's digital court transformation, we serve the community with integrity 
+                and excellence.
+              </p>
+              
+              <div className="about-features">
+                <div className="feature-item">
+                  <span className="feature-icon">🎯</span>
+                  <div className="feature-content">
+                    <h4>Our Mission</h4>
+                    <p>To provide efficient, accessible, and transparent judicial services through technology.</p>
+                  </div>
+                </div>
+                
+                <div className="feature-item">
+                  <span className="feature-icon">📜</span>
+                  <div className="feature-content">
+                    <h4>Our Vision</h4>
+                    <p>To be Ethiopia's leading digital court system, setting standards for judicial excellence.</p>
+                  </div>
+                </div>
+                
+                <div className="feature-item">
+                  <span className="feature-icon">⚖️</span>
+                  <div className="feature-content">
+                    <h4>Our Values</h4>
+                    <p>Integrity, Transparency, Accessibility, Innovation, and Justice.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="about-image">
+              <div className="image-placeholder">🏛️</div>
+              <div className="image-caption">Harari Supreme Court</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
+      
 
       {/* Services Section */}
       <section className="services-section">
         <div className="services-container">
           <div className="services-header">
+            <div className="services-tag">Digital Services</div>
             <h1 className="services-title">ፈጣን አገልግሎቶች</h1>
             <p className="services-subtitle">
               Access our comprehensive suite of digital court services
             </p>
           </div>
-          {/* Court Services */}
-          <div className="quick-access">
-            
-            <div className="quick-access-grid">
-              {courtServices.slice(0, 7).map(service => (
-                <button 
-                  key={service.id}
-                  className="quick-access-card"
-                  onClick={onOpenLogin}
-                >
-                  <span className="quick-access-icon">{service.icon}</span>
-                  <span className="quick-access-text">{service.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="process-section">
-        <div className="process-container">
-          <div className="process-header">
-            <h2>How Digital Court Works</h2>
-            <p>Simple steps to access court services online</p>
+          
+          
+          
+          {/* Services Grid */}
+          <div className="services-grid">
+            {courtServicesData.map(service => (
+              <div key={service.id} className="service-card" onClick={() => handleServiceClick(service)}>
+                <div className="service-icon">{service.icon}</div>
+                <h3 className="service-title">{service.name}</h3>
+                <p className="service-description">{service.description}</p>
+                <div className="service-footer">
+                  <button className="service-btn">
+                    Learn More <span className="service-arrow"></span>
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
           
-          <div className="proces-steps">
-            
-            <div className="proces-step">
-              <div className="step-number">1</div>
-              <div className="step-content">
-                <h3>Register Account</h3>
-                <p>Create your secure court portal account</p>
-              </div>
-            </div>
-            <div className="proces-step">
-              <div className="step-number">2</div>
-              <div className="step-content">
-                <h3>Select Service</h3>
-                <p>Choose from our range of court services</p>
-              </div>
-            </div>
-            
-            <div className="proces-step">
-              <div className="step-number">3</div>
-              <div className="step-content">
-                <h3>Complete Process</h3>
-                <p>Submit required information and documents</p>
-              </div>
-            </div>
-            
-            <div className="proces-step">
-              <div className="step-number">4</div>
-              <div className="step-content">
-                <h3>Track Progress</h3>
-                <p>Monitor your case in the dashboard</p>
-              </div>
-            </div>
-          </div>
+         
         </div>
       </section>
 
+      
+      
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container">
@@ -254,7 +290,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
             <div className="footer-services">
               <h4>Core Services</h4>
               <div className="service-links">
-                {courtServices.slice(0, 4).map(service => (
+                {courtServicesData.slice(0, 4).map(service => (
                   <a key={service.id} href="#">{service.name}</a>
                 ))}
               </div>
