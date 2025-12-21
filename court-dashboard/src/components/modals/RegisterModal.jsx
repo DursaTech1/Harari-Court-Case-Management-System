@@ -4,7 +4,7 @@ import { registerUser } from '../../api/api';
 
 const RegisterModal = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    fullName: '',
+    full_name: '',
     email: '',
     phone: '',
     password: '',
@@ -29,7 +29,7 @@ const RegisterModal = ({ onClose, onSubmit }) => {
 
     try {
       await registerUser({
-        full_name: formData.fullName,
+        full_name: formData.full_name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password
@@ -37,7 +37,7 @@ const RegisterModal = ({ onClose, onSubmit }) => {
 
       // KEEP EXISTING CALLBACK STRUCTURE
       onSubmit({
-        fullName: formData.fullName,
+        fullName: formData.full_name,
         email: formData.email,
         phone: formData.phone
       });
@@ -63,8 +63,8 @@ const RegisterModal = ({ onClose, onSubmit }) => {
               <label>Full Name *</label>
               <input 
                 type="text" 
-                name="fullName"
-                value={formData.fullName}
+                name="full_name"
+                value={formData.full_name}
                 onChange={handleChange}
                 required 
                 placeholder="Enter your full name as per ID" 
