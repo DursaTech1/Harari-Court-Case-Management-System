@@ -134,11 +134,11 @@ useEffect(() => {
               📊 Analytics
             </button>
            <button
-              className="logout-btn"
-              onClick={() => window.location.href = "/logout"}
-            >
-              Logout
-            </button>
+            className="logout-btn"
+            onClick={onLogout}  // Changed from window.location to use the prop
+          >
+                Logout
+          </button>
 
           </div>
         </div>
