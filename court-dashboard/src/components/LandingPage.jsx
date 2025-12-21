@@ -1,4 +1,4 @@
-// LandingPage.jsx - Updated with new sections
+// LandingPage.jsx - Updated without procedures tab
 
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
@@ -11,6 +11,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
   const [activeService, setActiveService] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [courtServicesData, setCourtServicesData] = useState(courtServices || []);
+  const [activeCourtInfoTab, setActiveCourtInfoTab] = useState('contacts'); // Changed default to contacts
 
   // Update time every second
   useEffect(() => {
@@ -32,7 +33,13 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
     loadServices();
   }, []);
 
-  
+  const importantContacts = [
+    { id: 1, department: "Chief Registrar", phone: "+251-XXX-XXX-XXX", email: "registrar@hararicourt.et" },
+    { id: 2, department: "Public Prosecutor", phone: "+251-XXX-XXX-XXX", email: "prosecutor@hararicourt.et" },
+    { id: 3, department: "Legal Aid Office", phone: "+251-XXX-XXX-XXX", email: "legalaid@hararicourt.et" },
+    { id: 4, department: "Records Department", phone: "+251-XXX-XXX-XXX", email: "records@hararicourt.et" },
+    { id: 5, department: "IT Support", phone: "+251-XXX-XXX-XXX", email: "support@hararicourt.et" },
+  ];
 
   // Important announcements
   const announcements = [
@@ -94,9 +101,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
           </button>
 
           <div className={`nav-right ${showMobileMenu ? 'show' : ''}`}>
-            <div className="nav-actions">
-
-            </div>
+           
             
             <div className="nav-clock">
               <div className="clock-icon">🕐</div>
@@ -121,7 +126,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
             </h1>
             <p className="hero-description">
               "ቀልጣፋና ዉጤታማ ለሆነ የዳኝነት አገልግሎት እንተጋለን!" <br />
-             " We strive for efficient and effective judicial services”
+              " We strive for efficient and effective judicial services"
             </p>
             
             <div className="hero-actions">
@@ -159,6 +164,124 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
         </div>
       </section>
 
+      
+
+      {/* Services Section */}
+      <section className="services-section">
+        <div className="services-container">
+          <div className="services-header">
+            <div className="services-tag">Digital Services</div>
+            <h1 className="services-title">Services</h1>
+            <p className="services-subtitle">
+              Access our comprehensive suite of digital court services
+            </p>
+          </div>
+          
+          {/* Search and Filter */}
+          
+          
+          {/* Services Grid */}
+          <div className="services-grid">
+            {courtServicesData.map(service => (
+              <div key={service.id} className="service-card" onClick={() => handleServiceClick(service)}>
+                <div className="service-icon">{service.icon}</div>
+                <h3 className="service-title">{service.name}</h3>
+                <p className="service-description">{service.description}</p>
+                <div className="service-footer">
+                  <button className="service-btn">
+                    Learn More <span className="service-arrow"></span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+     
+          
+        </div>
+      </section>
+      {/* Court Information Hub - NEW SECTION */}
+      <section className="court-info-section">
+        <div className="court-info-container">
+          <div className="section-header">
+            <div className="section-tag">Court Information Hub</div>
+            <h2 className="section-title">Court Resources & Information</h2>
+            <p className="section-subtitle">
+              Essential information about court contacts and announcements
+            </p>
+          </div>
+          
+          <div className="court-info-tabs">
+            <button 
+              className={`tab-btn ${activeCourtInfoTab === 'contacts' ? 'active' : ''}`}
+              onClick={() => setActiveCourtInfoTab('contacts')}
+            >
+              <span className="tab-icon">📞</span> Important Contacts
+            </button>
+            <button 
+              className={`tab-btn ${activeCourtInfoTab === 'announcements' ? 'active' : ''}`}
+              onClick={() => setActiveCourtInfoTab('announcements')}
+            >
+              <span className="tab-icon">📢</span> Announcements
+            </button>
+          </div>
+          
+          <div className="tab-content">
+            {activeCourtInfoTab === 'contacts' && (
+              <div className="contacts-table-container">
+                <table className="contacts-table">
+                  <thead>
+                    <tr>
+                      <th>Department</th>
+                      <th>Phone Number</th>
+                      <th>Email Address</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importantContacts.map(contact => (
+                      <tr key={contact.id}>
+                        <td>{contact.department}</td>
+                        <td>{contact.phone}</td>
+                        <td>{contact.email}</td>
+                        <td>
+                          <button className="contact-action-btn">
+                            Contact Now
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {activeCourtInfoTab === 'announcements' && (
+              <div className="announcements-list">
+                {announcements.map(announcement => (
+                  <div key={announcement.id} className="announcement-card">
+                    <div className="announcement-date">
+                      {new Date(announcement.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <div className="announcement-content">
+                      <h3 className="announcement-title">{announcement.title}</h3>
+                      <p className="announcement-description">{announcement.description}</p>
+                    </div>
+                    <div className="announcement-badge">New</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          
+        </div>
+      </section>
+
       {/* About Us Section */}
       <section className="about-section">
         <div className="about-container">
@@ -169,7 +292,7 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
           
           <div className="about-content">
             <div className="about-text">
-              <h3>የሀረሪ ፍርድ ቤት </h3>
+              <h3>የሀረሪ ፍርድ ቤት</h3>
               <p>
                 The Harari Region Supreme Court is committed to delivering accessible, efficient, 
                 and transparent judicial services through digital innovation. As a pioneer in 
@@ -212,44 +335,6 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
         </div>
       </section>
 
-      
-      
-
-      {/* Services Section */}
-      <section className="services-section">
-        <div className="services-container">
-          <div className="services-header">
-            <div className="services-tag">Digital Services</div>
-            <h1 className="services-title">ፈጣን አገልግሎቶች</h1>
-            <p className="services-subtitle">
-              Access our comprehensive suite of digital court services
-            </p>
-          </div>
-          
-          
-          
-          {/* Services Grid */}
-          <div className="services-grid">
-            {courtServicesData.map(service => (
-              <div key={service.id} className="service-card" onClick={() => handleServiceClick(service)}>
-                <div className="service-icon">{service.icon}</div>
-                <h3 className="service-title">{service.name}</h3>
-                <p className="service-description">{service.description}</p>
-                <div className="service-footer">
-                  <button className="service-btn">
-                    Learn More <span className="service-arrow"></span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-         
-        </div>
-      </section>
-
-      
-      
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container">
