@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import SubmitServiceView
+from .views import ServiceRequestView
 
 urlpatterns = [
-    path("", SubmitServiceView.as_view()),
+     path('services/submit/', ServiceRequestView.as_view(), name='service-submit'),
 ]

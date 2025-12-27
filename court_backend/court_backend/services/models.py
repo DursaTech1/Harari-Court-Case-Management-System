@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+# models.py
 class ServiceRequest(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -8,7 +9,7 @@ class ServiceRequest(models.Model):
         related_name="services"
     )
     service_name = models.CharField(max_length=255)
-    data = models.JSONField()
+    data = models.TextField(default="{}")   # Add default
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -21,5 +22,9 @@ class ServiceDocument(models.Model):
         related_name="documents",
         on_delete=models.CASCADE
     )
-    file = models.FileField(upload_to="documents/")
+    file = models.FileField(upload_to="service_documents/%Y/%m/%d/")  # Better organization
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    document_type = models.CharField(max_length=100, blank=True)  # Add document type field
+    
+    def __str__(self):
+        return f"{self.document_type} - {self.file.name}"

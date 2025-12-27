@@ -49,23 +49,25 @@ export const fetchCourtServices = async () => {
   return res.data;
 };
 
-// Generic service submission
-export const submitServiceRequest = async (serviceName, payload) => {
-  const urlName = serviceName.toLowerCase().replace(/\s/g, '-');
-  return axios.post(`${API_BASE}/services/${urlName}/`, payload, authHeaders());
-};
-
-// Deprecated / fallback method for full service submission
-export const submitService = async (token, payload) => {
-  const res = await fetch(`${API_BASE}/services/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) throw new Error("Service submission failed");
-  return res.json();
+// api.js
+export const submitServiceRequest = async (serviceName, formPayload) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await axios.post(
+      `${API_BASE}/services/submit/`,
+      formPayload,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Service submission error:', error);
+    throw error;
+  }
 };
