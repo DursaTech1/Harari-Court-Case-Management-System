@@ -419,7 +419,7 @@
 }
 
 .step-description {
-  font-size: 15px;
+  font-size: 25px;
   color: #64748b;
   margin: 0;
 }
@@ -465,7 +465,7 @@
 }
 
 .card-header h3 {
-  font-size: 18px;
+  font-size: 25px;
   font-weight: 600;
   color: #235467;
   margin: 0;
@@ -1226,5 +1226,178 @@
   
   .form-grid {
     grid-template-columns: 1fr;
+  }
+}
+/* Add these styles to your existing ServiceDetails.css */
+
+/* Fee Schedule Table */
+.fee-schedule {
+  margin-top: 24px;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fee-schedule h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #235467;
+  margin: 0 0 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.schedule-table {
+  width: 100%;
+}
+
+.schedule-row {
+  display: flex;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.schedule-row:last-child {
+  border-bottom: none;
+}
+
+.schedule-row.header {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+.schedule-cell {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #235467;
+}
+
+.schedule-row:not(.header):hover {
+  background: #f8fafc;
+}
+
+.schedule-row.header .schedule-cell {
+  color: #235467;
+  font-weight: 600;
+}
+
+/* Rating Stars */
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.star-btn:hover {
+  color: #235467;
+  transform: scale(1.1);
+}
+
+.star-btn.active {
+  color: #fbbf24;
+}
+
+.rating-text {
+  font-size: 14px;
+  color: #64748b;
+  margin-left: 12px;
+}
+
+/* Recommendation Buttons */
+.recommendation-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.recommend-btn {
+  padding: 8px 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recommend-btn:hover {
+  border-color: #235467;
+  color: #235467;
+}
+
+.recommend-btn.active {
+  background: #235467;
+  border-color: #235467;
+  color: #ffffff;
+}
+
+/* Enhanced Form Styles */
+.form-input[type="date"],
+.form-input[type="number"],
+.form-input[type="tel"],
+.form-input[type="email"] {
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #235467;
+  background: #ffffff;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.form-input[type="date"]:focus,
+.form-input[type="number"]:focus,
+.form-input[type="tel"]:focus,
+.form-input[type="email"]:focus {
+  outline: none;
+  border-color: #235467;
+  box-shadow: 0 0 0 3px rgba(35, 84, 103, 0.1);
+}
+
+/* Required field indicator */
+.form-label.required::after {
+  content: " *";
+  color: #dc2626;
+}
+
+/* Enhanced Review Section */
+.detail-value {
+  font-size: 15px;
+  color: #235467;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .schedule-row {
+    flex-direction: column;
+  }
+  
+  .schedule-cell {
+    padding: 8px 12px;
+  }
+  
+  .recommendation-buttons {
+    flex-direction: column;
+  }
+  
+  .recommend-btn {
+    width: 100%;
+    text-align: center;
   }
 }
