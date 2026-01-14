@@ -9,8 +9,134 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
   const [submittedRequests, setSubmittedRequests] = useState([]);
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [paymentAmount, setPaymentAmount] = useState(0);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const fileInputRef = useRef(null);
   
+  // Mock database of stored court documents
+  const storedCourtDocuments = [
+    {
+      id: 'DOC-001',
+      caseNumber: 'ETB-2024-001',
+      caseTitle: 'Civil Contract Dispute - Johnson vs Smith',
+      documentType: 'judgment',
+      fileName: 'Judgment_ETB-2024-001.pdf',
+      fileSize: '2.4 MB',
+      uploadDate: '2024-01-15',
+      caseYear: 2024,
+      description: 'Final judgment on civil contract dispute case',
+      keywords: ['contract', 'breach', 'compensation', 'civil'],
+      accessLevel: 'public',
+      courtLocation: 'Main Court Building',
+      judgeName: 'Judge Michael Anderson'
+    },
+    {
+      id: 'DOC-002',
+      caseNumber: 'ETB-2024-002',
+      caseTitle: 'Criminal Theft Case - State vs Roberts',
+      documentType: 'order',
+      fileName: 'Court_Order_ETB-2024-002.pdf',
+      fileSize: '1.8 MB',
+      uploadDate: '2024-01-20',
+      caseYear: 2024,
+      description: 'Court order for evidence submission',
+      keywords: ['theft', 'evidence', 'criminal'],
+      accessLevel: 'restricted',
+      courtLocation: 'North Branch Court',
+      judgeName: 'Judge Sarah Williams'
+    },
+    {
+      id: 'DOC-003',
+      caseNumber: 'ETB-2023-045',
+      caseTitle: 'Family Custody Case - Miller vs Miller',
+      documentType: 'certificate',
+      fileName: 'Custody_Certificate_ETB-2023-045.pdf',
+      fileSize: '1.2 MB',
+      uploadDate: '2023-12-10',
+      caseYear: 2023,
+      description: 'Child custody arrangement certificate',
+      keywords: ['family', 'custody', 'child', 'divorce'],
+      accessLevel: 'restricted',
+      courtLocation: 'Family Court Branch',
+      judgeName: 'Judge Robert Johnson'
+    },
+    {
+      id: 'DOC-004',
+      caseNumber: 'ETB-2024-015',
+      caseTitle: 'Commercial Breach of Contract',
+      documentType: 'filing',
+      fileName: 'Case_Filing_ETB-2024-015.pdf',
+      fileSize: '3.1 MB',
+      uploadDate: '2024-02-05',
+      caseYear: 2024,
+      description: 'Initial case filing documents',
+      keywords: ['commercial', 'contract', 'business'],
+      accessLevel: 'public',
+      courtLocation: 'Commercial Court',
+      judgeName: 'Judge Elizabeth Brown'
+    },
+    {
+      id: 'DOC-005',
+      caseNumber: 'ETB-2023-102',
+      caseTitle: 'Property Boundary Dispute',
+      documentType: 'evidence',
+      fileName: 'Evidence_Files_ETB-2023-102.zip',
+      fileSize: '15.2 MB',
+      uploadDate: '2023-11-30',
+      caseYear: 2023,
+      description: 'Evidence files including photos and surveys',
+      keywords: ['property', 'boundary', 'land', 'survey'],
+      accessLevel: 'restricted',
+      courtLocation: 'Property Court',
+      judgeName: 'Judge Thomas Davis'
+    },
+    {
+      id: 'DOC-006',
+      caseNumber: 'ETB-2024-008',
+      caseTitle: 'Labor Dispute - Wrongful Dismissal',
+      documentType: 'judgment',
+      fileName: 'Labor_Judgment_ETB-2024-008.pdf',
+      fileSize: '2.7 MB',
+      uploadDate: '2024-01-25',
+      caseYear: 2024,
+      description: 'Judgment on wrongful dismissal case',
+      keywords: ['labor', 'employment', 'dismissal', 'compensation'],
+      accessLevel: 'public',
+      courtLocation: 'Labor Court',
+      judgeName: 'Judge Patricia Wilson'
+    },
+    {
+      id: 'DOC-007',
+      caseNumber: 'ETB-2022-078',
+      caseTitle: 'Administrative Appeal Case',
+      documentType: 'order',
+      fileName: 'Appeal_Order_ETB-2022-078.pdf',
+      fileSize: '1.5 MB',
+      uploadDate: '2022-09-15',
+      caseYear: 2022,
+      description: 'Order for administrative appeal hearing',
+      keywords: ['administrative', 'appeal', 'government'],
+      accessLevel: 'public',
+      courtLocation: 'Administrative Court',
+      judgeName: 'Judge David Miller'
+    },
+    {
+      id: 'DOC-008',
+      caseNumber: 'ETB-2024-003',
+      caseTitle: 'Criminal Fraud Investigation',
+      documentType: 'evidence',
+      fileName: 'Fraud_Evidence_ETB-2024-003.zip',
+      fileSize: '8.9 MB',
+      uploadDate: '2024-02-01',
+      caseYear: 2024,
+      description: 'Evidence files for fraud investigation',
+      keywords: ['fraud', 'criminal', 'investigation', 'financial'],
+      accessLevel: 'restricted',
+      courtLocation: 'Criminal Court',
+      judgeName: 'Judge Jennifer Taylor'
+    }
+  ];
+
   // Court cause types and their fee calculation formulas
   const courtCauseTypes = {
     'Civil Case': {
@@ -31,7 +157,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         if (amount <= 50000000) return 12500;
         if (amount <= 75000000) return 15000;
         if (amount <= 100000000) return 20000;
-        return 25000; // Above 100,000,000
+        return 25000;
       }
     },
     'Criminal Case': {
@@ -52,7 +178,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         if (amount <= 50000000) return 6000;
         if (amount <= 75000000) return 7500;
         if (amount <= 100000000) return 10000;
-        return 15000; // Above 100,000,000
+        return 15000;
       }
     },
     'Family Case': {
@@ -73,7 +199,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         if (amount <= 50000000) return 3600;
         if (amount <= 75000000) return 4500;
         if (amount <= 100000000) return 6000;
-        return 8000; // Above 100,000,000
+        return 8000;
       }
     },
     'Commercial Case': {
@@ -94,7 +220,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         if (amount <= 50000000) return 15000;
         if (amount <= 75000000) return 18000;
         if (amount <= 100000000) return 24000;
-        return 30000; // Above 100,000,000
+        return 30000;
       }
     },
     'Labor Case': {
@@ -115,7 +241,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         if (amount <= 50000000) return 5000;
         if (amount <= 75000000) return 6000;
         if (amount <= 100000000) return 8000;
-        return 10000; // Above 100,000,000
+        return 10000;
       }
     },
     'Property Case': {
@@ -136,7 +262,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         if (amount <= 50000000) return 10000;
         if (amount <= 75000000) return 12000;
         if (amount <= 100000000) return 16000;
-        return 20000; // Above 100,000,000
+        return 20000;
       }
     }
   };
@@ -171,7 +297,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         { number: 3, title: 'Review & Submit', description: 'Verify and submit payment' }
       ],
       processingTime: 'Immediate confirmation',
-      showDocumentUpload: false, // No file upload for arbitration fee
+      showDocumentUpload: false,
       requiredDocuments: [],
       showPayment: true,
       showSearch: false,
@@ -183,17 +309,13 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     },
     'Search Document': {
       steps: [
-        { number: 1, title: 'Search Criteria', description: 'Specify document search parameters' },
-        { number: 2, title: 'Upload Authorization', description: 'Upload search authorization' },
-        { number: 3, title: 'Review & Submit', description: 'Verify and submit search request' }
+        { number: 1, title: 'Search Criteria', description: 'Enter search parameters' },
+        { number: 2, title: 'Search Results', description: 'Review found documents' },
+        { number: 3, title: 'Request Access', description: 'Request document access or download' }
       ],
       processingTime: '3-5 business days',
-      showDocumentUpload: true,
-      requiredDocuments: [
-        { id: 1, name: 'Authorization Letter', description: 'Legal authorization for document search (PDF)', required: true },
-        { id: 2, name: 'Case Reference', description: 'Case reference documents (PDF)', required: true },
-        { id: 3, name: 'Identification', description: 'Government ID for verification', required: true },
-      ],
+      showDocumentUpload: false,
+      requiredDocuments: [],
       showPayment: false,
       showSearch: true,
       showAppointment: false,
@@ -359,8 +481,93 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     setFormData(prev => ({ ...prev, claimAmount: formattedValue }));
   };
 
+  // Search function for document search
+  const handleSearchDocuments = () => {
+    if (!formData.searchCaseNumber && !formData.searchKeywords) {
+      alert('Please enter either a case number or keywords to search');
+      return;
+    }
+
+    setIsSearching(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      let results = storedCourtDocuments;
+      
+      // Filter by case number if provided
+      if (formData.searchCaseNumber) {
+        results = results.filter(doc => 
+          doc.caseNumber.toLowerCase().includes(formData.searchCaseNumber.toLowerCase())
+        );
+      }
+      
+      // Filter by document type if provided
+      if (formData.searchDocumentType) {
+        results = results.filter(doc => 
+          doc.documentType === formData.searchDocumentType
+        );
+      }
+      
+      // Filter by case year if provided
+      if (formData.searchCaseYear) {
+        results = results.filter(doc => 
+          doc.caseYear === parseInt(formData.searchCaseYear)
+        );
+      }
+      
+      // Filter by keywords if provided
+      if (formData.searchKeywords) {
+        const keywords = formData.searchKeywords.toLowerCase().split(',').map(k => k.trim());
+        results = results.filter(doc => 
+          keywords.some(keyword => 
+            doc.keywords.some(k => k.toLowerCase().includes(keyword)) ||
+            doc.caseTitle.toLowerCase().includes(keyword) ||
+            doc.description.toLowerCase().includes(keyword)
+          )
+        );
+      }
+      
+      setSearchResults(results);
+      setIsSearching(false);
+      
+      if (results.length === 0) {
+        alert('No documents found matching your search criteria.');
+      } else {
+        // Auto-advance to step 2 if results found
+        if (step === 1 && results.length > 0) {
+          setStep(2);
+        }
+      }
+    }, 1500);
+  };
+
+  const handleRequestAccess = (documentId) => {
+    const document = storedCourtDocuments.find(doc => doc.id === documentId);
+    if (!document) return;
+    
+    const newRequest = {
+      id: Date.now(),
+      service: 'Search Document',
+      documentId: documentId,
+      documentName: document.fileName,
+      caseNumber: document.caseNumber,
+      requestedAt: new Date().toLocaleString(),
+      status: document.accessLevel === 'public' ? 'Access Granted' : 'Pending Approval',
+      referenceId: `DOC-REQ-${Date.now().toString().slice(-6)}`,
+      formData: { ...formData },
+      processingTime: document.accessLevel === 'public' ? 'Immediate' : '1-2 business days'
+    };
+    
+    setSubmittedRequests(prev => [newRequest, ...prev]);
+    
+    if (document.accessLevel === 'public') {
+      alert(`Access granted to ${document.fileName}\nYou can now view and download this document.`);
+    } else {
+      alert(`Request submitted for ${document.fileName}\nReference ID: ${newRequest.referenceId}\nYour request will be reviewed within 1-2 business days.`);
+    }
+  };
+
   const handleSubmitApplication = () => {
-    // For Arbitration Fee, check required fields
     if (service.name === 'Arbitration Fee') {
       if (!formData.courtCauseType) {
         alert('Please select the type of court case.');
@@ -376,7 +583,29 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       }
     }
 
-    // For other services with document upload
+    if (service.name === 'Search Document') {
+      if (searchResults.length === 0 && step === 2) {
+        alert('Please search for documents first.');
+        return;
+      }
+      
+      // For search document, we submit document access requests
+      const selectedDocs = searchResults.filter(doc => formData[`selectDoc_${doc.id}`]);
+      if (selectedDocs.length === 0) {
+        alert('Please select at least one document to request access.');
+        return;
+      }
+      
+      selectedDocs.forEach(doc => {
+        handleRequestAccess(doc.id);
+      });
+      
+      setSearchResults([]);
+      setFormData({});
+      setStep(1);
+      return;
+    }
+
     if (service.name !== 'Arbitration Fee' && config.showDocumentUpload && uploadedFiles.length === 0) {
       alert('Please upload at least one document before submitting.');
       return;
@@ -407,7 +636,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       formData: { ...formData },
       processingTime: config.processingTime,
       ...(service.name === 'Arbitration Fee' && { 
-        paymentAmount: paymentAmount + 50, // Includes processing fee
+        paymentAmount: paymentAmount + 50,
         courtCauseType: formData.courtCauseType 
       })
     };
@@ -483,25 +712,24 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
                 <div key={request.id} className="request-item">
                   <div className="request-header">
                     <span className="request-ref">{request.referenceId}</span>
-                    <span className={`request-status ${request.status.toLowerCase()}`}>
+                    <span className={`request-status ${request.status.toLowerCase().replace(' ', '-')}`}>
                       {request.status}
                     </span>
                   </div>
                   <div className="request-meta">
-                    <span>{request.submittedAt}</span>
-                    <span>{request.files.length} files</span>
+                    <span>{request.submittedAt || request.requestedAt}</span>
+                    <span>{request.files?.length || 0} files</span>
                   </div>
-                  <div className="request-preview">
-                    {request.files.slice(0, 2).map((file, index) => (
-                      <span key={index} className="file-preview-item">
-                        {file.type.includes('pdf') ? '📄' : 
-                         file.type.includes('image') ? '🖼️' : '📎'}
-                      </span>
-                    ))}
-                    {request.files.length > 2 && (
-                      <span className="more-files-count">+{request.files.length - 2}</span>
-                    )}
-                  </div>
+                  {request.documentName && (
+                    <div className="request-preview">
+                      <span className="file-preview-item">📄 {request.documentName}</span>
+                    </div>
+                  )}
+                  {request.caseNumber && (
+                    <div className="request-case">
+                      <span>Case: {request.caseNumber}</span>
+                    </div>
+                  )}
                 </div>
               ))}
           </div>
@@ -646,6 +874,123 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       );
     }
     
+    if (service.name === 'Search Document') {
+      return (
+        <div className="step-content">
+          <div className="step-header">
+            <h2>Search Court Documents</h2>
+            <p className="step-description">Enter search criteria to find court documents</p>
+          </div>
+          
+          <div className="section-card">
+            <h3>Search Criteria</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Case Number</label>
+                <input 
+                  className="form-input" 
+                  type="text" 
+                  name="searchCaseNumber" 
+                  value={formData.searchCaseNumber || ''}
+                  onChange={handleInputChange}
+                  placeholder="e.g., ETB-2024-001"
+                />
+                <small className="form-hint">Enter full or partial case number</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Document Type</label>
+                <select 
+                  className="form-select" 
+                  name="searchDocumentType" 
+                  value={formData.searchDocumentType || ''}
+                  onChange={handleInputChange}
+                >
+                  <option value="">All document types</option>
+                  <option value="judgment">Judgment</option>
+                  <option value="order">Court Order</option>
+                  <option value="filing">Case Filing</option>
+                  <option value="evidence">Evidence</option>
+                  <option value="certificate">Certificate</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Case Year</label>
+                <input 
+                  className="form-input" 
+                  type="number" 
+                  name="searchCaseYear" 
+                  value={formData.searchCaseYear || ''}
+                  onChange={handleInputChange}
+                  placeholder="YYYY"
+                  min="2000"
+                  max={new Date().getFullYear()}
+                />
+              </div>
+              
+              <div className="form-group full-width">
+                <label className="form-label">Search Keywords</label>
+                <input 
+                  className="form-input" 
+                  type="text" 
+                  name="searchKeywords" 
+                  value={formData.searchKeywords || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter keywords separated by commas (e.g., contract, civil, property)"
+                />
+                <small className="form-hint">Search in document titles, descriptions, and keywords</small>
+              </div>
+            </div>
+            
+            <div className="search-actions">
+              <button 
+                className="btn-primary" 
+                onClick={handleSearchDocuments}
+                disabled={isSearching || (!formData.searchCaseNumber && !formData.searchKeywords)}
+              >
+                {isSearching ? (
+                  <>
+                    <div className="spinner-small"></div>
+                    Searching...
+                  </>
+                ) : (
+                  'Search Documents'
+                )}
+              </button>
+            </div>
+          </div>
+          
+          <div className="section-card">
+            <h3>Search Tips</h3>
+            <div className="tips-list">
+              <div className="tip-item">
+                <div className="tip-icon">🔍</div>
+                <div className="tip-content">
+                  <strong>Use Case Number</strong>
+                  <p>Enter exact case numbers like "ETB-2024-001" for precise results</p>
+                </div>
+              </div>
+              <div className="tip-item">
+                <div className="tip-icon">📁</div>
+                <div className="tip-content">
+                  <strong>Filter by Document Type</strong>
+                  <p>Select specific document types to narrow your search</p>
+                </div>
+              </div>
+              <div className="tip-item">
+                <div className="tip-icon">🔑</div>
+                <div className="tip-content">
+                  <strong>Use Keywords</strong>
+                  <p>Search by case type, judge name, or relevant terms</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="step-content">
         <div className="step-header">
@@ -720,6 +1065,161 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
   };
 
   const renderStep2Content = () => {
+    if (service.name === 'Search Document') {
+      return (
+        <div className="step-content">
+          <div className="step-header">
+            <h2>Search Results</h2>
+            <p className="step-description">
+              Found {searchResults.length} document{searchResults.length !== 1 ? 's' : ''} matching your criteria
+            </p>
+          </div>
+          
+          <div className="section-card">
+            <div className="results-header">
+              <h3>Documents Found</h3>
+              <button 
+                className="btn-secondary" 
+                onClick={() => {
+                  setSearchResults([]);
+                  setStep(1);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                New Search
+              </button>
+            </div>
+            
+            {searchResults.length === 0 ? (
+              <div className="empty-results">
+                <div className="empty-icon">🔍</div>
+                <h4>No documents found</h4>
+                <p>Try different search criteria or broaden your search</p>
+                <button 
+                  className="btn-secondary" 
+                  onClick={() => setStep(1)}
+                >
+                  Back to Search
+                </button>
+              </div>
+            ) : (
+              <div className="search-results-list">
+                {searchResults.map(doc => (
+                  <div key={doc.id} className="document-result-card">
+                    <div className="document-header">
+                      <div className="doc-icon">
+                        {doc.documentType === 'judgment' ? '⚖️' :
+                         doc.documentType === 'order' ? '📜' :
+                         doc.documentType === 'filing' ? '📁' :
+                         doc.documentType === 'evidence' ? '🖼️' :
+                         doc.documentType === 'certificate' ? '📃' : '📄'}
+                      </div>
+                      <div className="doc-title-section">
+                        <h4>{doc.caseTitle}</h4>
+                        <div className="doc-meta">
+                          <span className="case-number">Case: {doc.caseNumber}</span>
+                          <span className="doc-type">{doc.documentType}</span>
+                          <span className="doc-size">{doc.fileSize}</span>
+                          <span className="doc-year">Year: {doc.caseYear}</span>
+                        </div>
+                      </div>
+                      <div className="access-badge">
+                        <span className={`access-level ${doc.accessLevel}`}>
+                          {doc.accessLevel === 'public' ? 'Public Access' : 'Restricted Access'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="document-details">
+                      <p className="doc-description">{doc.description}</p>
+                      
+                      <div className="doc-info-grid">
+                        <div className="info-item">
+                          <span className="info-label">Court Location:</span>
+                          <span className="info-value">{doc.courtLocation}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Presiding Judge:</span>
+                          <span className="info-value">{doc.judgeName}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Upload Date:</span>
+                          <span className="info-value">{doc.uploadDate}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">File Name:</span>
+                          <span className="info-value">{doc.fileName}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="keywords-section">
+                        <span className="keywords-label">Keywords:</span>
+                        <div className="keywords-list">
+                          {doc.keywords.map((keyword, index) => (
+                            <span key={index} className="keyword-tag">{keyword}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="document-actions">
+                      <label className="checkbox-container select-doc">
+                        <input 
+                          type="checkbox" 
+                          name={`selectDoc_${doc.id}`}
+                          checked={!!formData[`selectDoc_${doc.id}`]}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            [`selectDoc_${doc.id}`]: e.target.checked
+                          }))}
+                        />
+                        <span className="checkmark"></span>
+                        <span className="checkbox-label">Select for access request</span>
+                      </label>
+                      
+                      <div className="action-buttons">
+                        <button 
+                          className="btn-secondary"
+                          onClick={() => alert(`Preview functionality would open ${doc.fileName}`)}
+                        >
+                          Preview
+                        </button>
+                        <button 
+                          className={`btn-primary ${doc.accessLevel === 'public' ? '' : 'btn-restricted'}`}
+                          onClick={() => handleRequestAccess(doc.id)}
+                        >
+                          {doc.accessLevel === 'public' ? 'Download' : 'Request Access'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {searchResults.length > 0 && (
+            <div className="selection-summary">
+              <div className="summary-content">
+                <span className="selected-count">
+                  {Object.keys(formData).filter(key => key.startsWith('selectDoc_') && formData[key]).length} document(s) selected
+                </span>
+                <button 
+                  className="btn-submit"
+                  onClick={() => setStep(3)}
+                  disabled={Object.keys(formData).filter(key => key.startsWith('selectDoc_') && formData[key]).length === 0}
+                >
+                  Continue with Selected Documents
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
     if (service.name === 'Arbitration Fee') {
       return (
         <div className="step-content">
@@ -861,7 +1361,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       );
     }
     
-    // Step 2 content for other services (with file upload)
+    // Step 2 content for other services
     return (
       <div className="step-content">
         <div className="step-header">
@@ -936,39 +1436,6 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         )}
 
         {/* Rest of step 2 for other services */}
-        {config.showSearch && service.name === 'Search Document' && (
-          <div className="form-section">
-            <div className="section-card">
-              <h3>Search Criteria</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label className="form-label">Case Number *</label>
-                  <input className="form-input" type="text" name="caseNumber" onChange={handleInputChange} placeholder="Enter case number" required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Document Type *</label>
-                  <select className="form-select" name="documentType" onChange={handleInputChange} required>
-                    <option value="">Select document type</option>
-                    <option value="judgment">Judgment</option>
-                    <option value="order">Court Order</option>
-                    <option value="filing">Case Filing</option>
-                    <option value="evidence">Evidence</option>
-                    <option value="certificate">Certificate</option>
-                  </select>
-                </div>
-                <div className="form-group full-width">
-                  <label className="form-label">Additional Search Keywords</label>
-                  <input className="form-input" type="text" name="keywords" onChange={handleInputChange} placeholder="Enter keywords separated by commas" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Case Year</label>
-                  <input className="form-input" type="number" name="caseYear" onChange={handleInputChange} placeholder="YYYY" min="1900" max={new Date().getFullYear()} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {config.showAppointment && service.name === 'Daily Appointment' && (
           <div className="form-section">
             <div className="section-card">
@@ -1195,128 +1662,302 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     );
   };
 
-  const renderStep3Content = () => (
-    <div className="step-content">
-      <div className="step-header">
-        <h2>Review & Submit</h2>
-        <p className="step-description">Verify all information before submission</p>
-      </div>
+  const renderStep3Content = () => {
+    if (service.name === 'Search Document') {
+      const selectedDocs = searchResults.filter(doc => formData[`selectDoc_${doc.id}`]);
       
-      <div className="review-card">
-        <div className="review-header">
-          <h3>{service.name} Summary</h3>
-          <span className="reference-id">
-            Ref: {service.name.slice(0, 3).toUpperCase()}-{Date.now().toString().slice(-8)}
-          </span>
-        </div>
-        
-        <div className="review-sections">
-          <div className="review-section">
-            <h4>Service Information</h4>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">Service</span>
-                <span className="info-value">{service.name}</span>
+      return (
+        <div className="step-content">
+          <div className="step-header">
+            <h2>Request Document Access</h2>
+            <p className="step-description">Review and submit your document access requests</p>
+          </div>
+          
+          <div className="section-card">
+            <div className="request-summary-header">
+              <h3>Access Request Summary</h3>
+              <div className="request-count">
+                <span className="count-label">Documents Selected:</span>
+                <span className="count-value">{selectedDocs.length}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Request Date</span>
-                <span className="info-value">{new Date().toLocaleDateString()}</span>
+            </div>
+            
+            <div className="selected-documents-list">
+              <h4>Selected Documents</h4>
+              {selectedDocs.map(doc => (
+                <div key={doc.id} className="selected-doc-item">
+                  <div className="selected-doc-icon">
+                    {doc.documentType === 'judgment' ? '⚖️' :
+                     doc.documentType === 'order' ? '📜' :
+                     doc.documentType === 'filing' ? '📁' :
+                     doc.documentType === 'evidence' ? '🖼️' :
+                     doc.documentType === 'certificate' ? '📃' : '📄'}
+                  </div>
+                  <div className="selected-doc-details">
+                    <div className="selected-doc-title">
+                      <strong>{doc.fileName}</strong>
+                      <span className={`access-badge-small ${doc.accessLevel}`}>
+                        {doc.accessLevel === 'public' ? 'Public' : 'Restricted'}
+                      </span>
+                    </div>
+                    <div className="selected-doc-info">
+                      <span>Case: {doc.caseNumber}</span>
+                      <span>Type: {doc.documentType}</span>
+                      <span>Size: {doc.fileSize}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="access-requirements">
+              <h4>Access Requirements</h4>
+              <div className="requirements-list">
+                <div className="requirement-item">
+                  <div className="req-icon">✅</div>
+                  <div className="req-content">
+                    <strong>Public Documents</strong>
+                    <p>Available for immediate download after request</p>
+                  </div>
+                </div>
+                <div className="requirement-item">
+                  <div className="req-icon">⏳</div>
+                  <div className="req-content">
+                    <strong>Restricted Documents</strong>
+                    <p>Require court approval within 1-2 business days</p>
+                  </div>
+                </div>
+                <div className="requirement-item">
+                  <div className="req-icon">📋</div>
+                  <div className="req-content">
+                    <strong>Authorization Required</strong>
+                    <p>May require additional authorization for sensitive cases</p>
+                  </div>
+                </div>
               </div>
-              <div className="info-item">
-                <span className="info-label">Processing Time</span>
-                <span className="info-value">{config.processingTime}</span>
+            </div>
+            
+            <div className="contact-section">
+              <h4>Contact Information for Access Requests</h4>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label">Full Name *</label>
+                  <input 
+                    className="form-input" 
+                    type="text" 
+                    name="requesterName" 
+                    value={formData.requesterName || ''}
+                    onChange={handleInputChange}
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Relationship to Case *</label>
+                  <select 
+                    className="form-select" 
+                    name="relationship" 
+                    value={formData.relationship || ''}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select relationship</option>
+                    <option value="party">Party to the case</option>
+                    <option value="lawyer">Legal representative</option>
+                    <option value="researcher">Researcher</option>
+                    <option value="public">Member of public</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email Address *</label>
+                  <input 
+                    className="form-input" 
+                    type="email" 
+                    name="requesterEmail" 
+                    value={formData.requesterEmail || ''}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Phone Number *</label>
+                  <input 
+                    className="form-input" 
+                    type="tel" 
+                    name="requesterPhone" 
+                    value={formData.requesterPhone || ''}
+                    onChange={handleInputChange}
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label className="form-label">Purpose of Access *</label>
+                  <textarea 
+                    className="form-textarea" 
+                    name="accessPurpose" 
+                    value={formData.accessPurpose || ''}
+                    onChange={handleInputChange}
+                    rows="3"
+                    placeholder="Explain why you need access to these documents"
+                    required
+                  ></textarea>
+                </div>
               </div>
-              {service.name === 'Arbitration Fee' && (
-                <>
-                  <div className="info-item">
-                    <span className="info-label">Case Type</span>
-                    <span className="info-value">{formData.courtCauseType || 'Not specified'}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Claim Amount</span>
-                    <span className="info-value">
-                      {formData.claimAmount ? `ETB ${parseFloat(formData.claimAmount.replace(/,/g, '')).toLocaleString()}` : 'Not specified'}
-                    </span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Court Fee</span>
-                    <span className="info-value">ETB {paymentAmount.toLocaleString()}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Total Amount</span>
-                    <span className="info-value">ETB {(paymentAmount + 50).toLocaleString()}</span>
-                  </div>
-                </>
-              )}
             </div>
           </div>
           
-          {service.name !== 'Arbitration Fee' && config.showDocumentUpload && uploadedFiles.length > 0 && (
-            <div className="review-section">
-              <h4>Uploaded Documents ({uploadedFiles.length})</h4>
-              <div className="files-preview">
-                {uploadedFiles.map(file => (
-                  <div key={file.id} className="file-review-item">
-                    <div className="file-icon">📄</div>
-                    <div className="file-review-info">
-                      <span className="file-review-name">{file.name}</span>
-                      <span className="file-review-size">{formatFileSize(file.size)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className="confirmation-box">
+            <label className="checkbox-container">
+              <input type="checkbox" id="confirmAccess" required />
+              <span className="checkmark"></span>
+              <span className="checkbox-label">
+                I confirm that I have a legitimate need to access these documents and will use them only for lawful purposes
+              </span>
+            </label>
+          </div>
+          
+          <div className="notice-card">
+            <div className="notice-header">
+              <div className="notice-icon">⚠️</div>
+              <h4>Important Notice</h4>
             </div>
-          )}
-
-          {Object.keys(formData).length > 0 && (
-            <div className="review-section">
-              <h4>Entered Details</h4>
-              <div className="details-grid">
-                {Object.entries(formData)
-                  .filter(([key]) => !key.includes('password'))
-                  .map(([key, value]) => (
-                    <div key={key} className="detail-item">
-                      <span className="detail-label">
-                        {key
-                          .replace(/([A-Z])/g, ' $1')
-                          .replace(/([a-z])([A-Z])/g, '$1 $2')
-                          .replace(/^./, str => str.toUpperCase())
-                        }
-                      </span>
-                      <span className="detail-value">{value || 'Not specified'}</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
+            <p className="notice-text">
+              By submitting this request, you acknowledge that unauthorized access to court documents is prohibited by law. 
+              Restricted documents require court approval and may be denied if proper authorization is not provided. 
+              You will receive email notifications about the status of your access requests.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="step-content">
+        <div className="step-header">
+          <h2>Review & Submit</h2>
+          <p className="step-description">Verify all information before submission</p>
         </div>
         
-        <div className="confirmation-box">
-          <label className="checkbox-container">
-            <input type="checkbox" id="confirm" required />
-            <span className="checkmark"></span>
-            <span className="checkbox-label">
-              I confirm that all information provided is accurate and complete
+        <div className="review-card">
+          <div className="review-header">
+            <h3>{service.name} Summary</h3>
+            <span className="reference-id">
+              Ref: {service.name.slice(0, 3).toUpperCase()}-{Date.now().toString().slice(-8)}
             </span>
-          </label>
-        </div>
-      </div>
+          </div>
+          
+          <div className="review-sections">
+            <div className="review-section">
+              <h4>Service Information</h4>
+              <div className="info-grid">
+                <div className="info-item">
+                  <span className="info-label">Service</span>
+                  <span className="info-value">{service.name}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Request Date</span>
+                  <span className="info-value">{new Date().toLocaleDateString()}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Processing Time</span>
+                  <span className="info-value">{config.processingTime}</span>
+                </div>
+                {service.name === 'Arbitration Fee' && (
+                  <>
+                    <div className="info-item">
+                      <span className="info-label">Case Type</span>
+                      <span className="info-value">{formData.courtCauseType || 'Not specified'}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Claim Amount</span>
+                      <span className="info-value">
+                        {formData.claimAmount ? `ETB ${parseFloat(formData.claimAmount.replace(/,/g, '')).toLocaleString()}` : 'Not specified'}
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Court Fee</span>
+                      <span className="info-value">ETB {paymentAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Total Amount</span>
+                      <span className="info-value">ETB {(paymentAmount + 50).toLocaleString()}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {service.name !== 'Arbitration Fee' && config.showDocumentUpload && uploadedFiles.length > 0 && (
+              <div className="review-section">
+                <h4>Uploaded Documents ({uploadedFiles.length})</h4>
+                <div className="files-preview">
+                  {uploadedFiles.map(file => (
+                    <div key={file.id} className="file-review-item">
+                      <div className="file-icon">📄</div>
+                      <div className="file-review-info">
+                        <span className="file-review-name">{file.name}</span>
+                        <span className="file-review-size">{formatFileSize(file.size)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-      <div className="notice-card">
-        <div className="notice-header">
-          <div className="notice-icon">⚠️</div>
-          <h4>Important Notice</h4>
+            {Object.keys(formData).length > 0 && (
+              <div className="review-section">
+                <h4>Entered Details</h4>
+                <div className="details-grid">
+                  {Object.entries(formData)
+                    .filter(([key]) => !key.startsWith('selectDoc_') && !key.includes('password'))
+                    .map(([key, value]) => (
+                      <div key={key} className="detail-item">
+                        <span className="detail-label">
+                          {key
+                            .replace(/([A-Z])/g, ' $1')
+                            .replace(/([a-z])([A-Z])/g, '$1 $2')
+                            .replace(/^./, str => str.toUpperCase())
+                            .replace('Search ', '')
+                          }
+                        </span>
+                        <span className="detail-value">{value || 'Not specified'}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="confirmation-box">
+            <label className="checkbox-container">
+              <input type="checkbox" id="confirm" required />
+              <span className="checkmark"></span>
+              <span className="checkbox-label">
+                I confirm that all information provided is accurate and complete
+              </span>
+            </label>
+          </div>
         </div>
-        <p className="notice-text">
-          By submitting this request, you acknowledge that all information provided is truthful and accurate. 
-          {service.name === 'Arbitration Fee' && ' Court fee payment is required for case filing and is non-refundable once processed.'}
-          {service.name === 'Complaint Form' && ' Your complaint will be reviewed within the specified processing time.'}
-          {service.name === 'Daily Appointment' && ' Appointment confirmation will be sent via email/SMS.'}
-          False information may result in legal consequences.
-        </p>
+
+        <div className="notice-card">
+          <div className="notice-header">
+            <div className="notice-icon">⚠️</div>
+            <h4>Important Notice</h4>
+          </div>
+          <p className="notice-text">
+            By submitting this request, you acknowledge that all information provided is truthful and accurate. 
+            {service.name === 'Arbitration Fee' && ' Court fee payment is required for case filing and is non-refundable once processed.'}
+            {service.name === 'Complaint Form' && ' Your complaint will be reviewed within the specified processing time.'}
+            {service.name === 'Daily Appointment' && ' Appointment confirmation will be sent via email/SMS.'}
+            False information may result in legal consequences.
+          </p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderServiceSpecificContent = () => {
     switch(step) {
@@ -1395,7 +2036,10 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
                     <button 
                       className="btn-primary" 
                       onClick={() => setStep(step + 1)} 
-                      disabled={service.name === 'Arbitration Fee' && step === 1 && (!formData.courtCauseType || !formData.claimAmount || !formData.caseTitle)}
+                      disabled={
+                        (service.name === 'Arbitration Fee' && step === 1 && (!formData.courtCauseType || !formData.claimAmount || !formData.caseTitle)) ||
+                        (service.name === 'Search Document' && step === 1 && (!formData.searchCaseNumber && !formData.searchKeywords))
+                      }
                     >
                       Continue
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1407,7 +2051,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
                       </svg>
-                      Submit Request
+                      {service.name === 'Search Document' ? 'Submit Access Requests' : 'Submit Request'}
                     </button>
                   )}
                 </div>
