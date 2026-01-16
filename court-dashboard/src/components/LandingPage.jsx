@@ -1,4 +1,4 @@
-// LandingPage.jsx - Updated without procedures tab
+// LandingPage.jsx 
 
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
@@ -131,10 +131,10 @@ const LandingPage = ({ onOpenLogin, onOpenRegister, courtServices }) => {
             
             <div className="hero-actions">
               <button className="hero-action-btn primary-btn" onClick={onOpenRegister}>
-                <span>🚀</span> Get Started
+                <span></span> Register
               </button>
               <button className="hero-action-btn secondary-btn" onClick={onOpenLogin}>
-                <span>🔍</span> Explore Services
+                <span></span> Login
               </button>
             </div>
             

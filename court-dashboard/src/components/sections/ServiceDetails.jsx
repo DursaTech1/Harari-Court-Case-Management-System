@@ -11,12 +11,9 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [appointments, setAppointments] = useState([]); // New state for appointments list
+  const [selectedAppointment, setSelectedAppointment] = useState(null); // For appointment details view
   const fileInputRef = useRef(null);
-  
-  // Check if current service is Daily Appointment
-  const isDailyAppointment = service.name === 'Daily Appointment';
   
   // Mock database of stored court documents
   const storedCourtDocuments = [
@@ -33,7 +30,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['contract', 'breach', 'compensation', 'civil'],
       accessLevel: 'public',
       courtLocation: 'Main Court Building',
-      judgeName: 'Judge Michael Anderson'
+      judgeName: 'Judge Michael Anderson',
+      fileContent: 'This is a mock PDF content for Civil Contract Dispute case. The judgment was delivered on January 15, 2024, resolving the contract dispute between Johnson and Smith. The court found in favor of Johnson and awarded compensatory damages of $50,000 for breach of contract.'
     },
     {
       id: 'DOC-002',
@@ -48,7 +46,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['theft', 'evidence', 'criminal'],
       accessLevel: 'restricted',
       courtLocation: 'North Branch Court',
-      judgeName: 'Judge Sarah Williams'
+      judgeName: 'Judge Sarah Williams',
+      fileContent: 'This is a mock PDF content for Criminal Theft Case. Court order issued for evidence submission in State vs Roberts case. The defendant is ordered to produce all relevant documents and evidence within 14 days.'
     },
     {
       id: 'DOC-003',
@@ -63,7 +62,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['family', 'custody', 'child', 'divorce'],
       accessLevel: 'restricted',
       courtLocation: 'Family Court Branch',
-      judgeName: 'Judge Robert Johnson'
+      judgeName: 'Judge Robert Johnson',
+      fileContent: 'This is a mock PDF content for Family Custody Case. Custody arrangement certificate issued for Miller vs Miller case. Joint custody granted with primary residence to the mother and visitation rights to the father.'
     },
     {
       id: 'DOC-004',
@@ -78,7 +78,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['commercial', 'contract', 'business'],
       accessLevel: 'public',
       courtLocation: 'Commercial Court',
-      judgeName: 'Judge Elizabeth Brown'
+      judgeName: 'Judge Elizabeth Brown',
+      fileContent: 'This is a mock PDF content for Commercial Breach of Contract case. Initial filing documents submitted to the commercial court. The plaintiff alleges breach of commercial agreement and seeks damages of $250,000.'
     },
     {
       id: 'DOC-005',
@@ -93,7 +94,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['property', 'boundary', 'land', 'survey'],
       accessLevel: 'restricted',
       courtLocation: 'Property Court',
-      judgeName: 'Judge Thomas Davis'
+      judgeName: 'Judge Thomas Davis',
+      fileContent: 'This is a mock ZIP content for Property Boundary Dispute case. Contains evidence files, photos, and survey documents showing property boundaries and disputed areas.'
     },
     {
       id: 'DOC-006',
@@ -108,7 +110,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['labor', 'employment', 'dismissal', 'compensation'],
       accessLevel: 'public',
       courtLocation: 'Labor Court',
-      judgeName: 'Judge Patricia Wilson'
+      judgeName: 'Judge Patricia Wilson',
+      fileContent: 'This is a mock PDF content for Labor Dispute case. Judgment delivered on wrongful dismissal claim. The court found the dismissal to be unjust and awarded the plaintiff compensation equivalent to 12 months salary.'
     },
     {
       id: 'DOC-007',
@@ -123,7 +126,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['administrative', 'appeal', 'government'],
       accessLevel: 'public',
       courtLocation: 'Administrative Court',
-      judgeName: 'Judge David Miller'
+      judgeName: 'Judge David Miller',
+      fileContent: 'This is a mock PDF content for Administrative Appeal Case. Court order for appeal hearing scheduled for November 15, 2022. Both parties are ordered to submit their arguments 10 days before the hearing.'
     },
     {
       id: 'DOC-008',
@@ -138,7 +142,8 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       keywords: ['fraud', 'criminal', 'investigation', 'financial'],
       accessLevel: 'restricted',
       courtLocation: 'Criminal Court',
-      judgeName: 'Judge Jennifer Taylor'
+      judgeName: 'Judge Jennifer Taylor',
+      fileContent: 'This is a mock ZIP content for Criminal Fraud Investigation. Contains evidence files and investigation documents related to alleged financial fraud and misappropriation of funds.'
     }
   ];
 
@@ -272,7 +277,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     }
   };
 
-  // Service-specific configurations
+  // Service-specific configurations - UPDATED for Daily Appointment
   const serviceConfigs = {
     'Document Submission': {
       steps: [
@@ -340,6 +345,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       showPayment: false,
       showSearch: false,
       showAppointment: true,
+      showAppointmentList: true, // NEW: Flag to show appointments list
       showComplaintForm: false,
       showFeedback: false,
       showLocation: true,
@@ -620,6 +626,130 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     setFormData(prev => ({ ...prev, claimAmount: formattedValue }));
   };
 
+  // Function to download a document - WORKING VERSION
+  const handleDownloadDocument = (documentId) => {
+    const document = storedCourtDocuments.find(doc => doc.id === documentId);
+    if (!document) {
+      alert('Document not found');
+      return;
+    }
+    
+    // Create a simple text file with document information
+    const textContent = `
+COURT DOCUMENT
+==============
+Case Number: ${document.caseNumber}
+Case Title: ${document.caseTitle}
+Document Type: ${document.documentType}
+Judge: ${document.judgeName}
+Court Location: ${document.courtLocation}
+Upload Date: ${document.uploadDate}
+File Size: ${document.fileSize}
+Access Level: ${document.accessLevel}
+Case Year: ${document.caseYear}
+
+DESCRIPTION:
+${document.description}
+
+DOCUMENT CONTENT:
+${document.fileContent}
+
+KEYWORDS: ${document.keywords.join(', ')}
+
+Generated: ${new Date().toLocaleString()}
+Document ID: ${document.id}
+`;
+
+    // Try multiple download methods
+    try {
+      // Method 1: Create blob and download
+      const blob = new Blob([textContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${document.caseNumber}_${document.documentType}.txt`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      
+      // Fallback method: Create data URL
+      try {
+        const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(textContent);
+        const downloadLink = document.createElement('a');
+        downloadLink.setAttribute("href", dataStr);
+        downloadLink.setAttribute("download", `${document.caseNumber}_${document.documentType}.txt`);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      } catch (fallbackError) {
+        console.error('Fallback download error:', fallbackError);
+        alert('Could not download file. Please try again or check your browser settings.');
+        return;
+      }
+    }
+    
+    // Add to submitted requests
+    const newRequest = {
+      id: Date.now(),
+      service: 'Search Document',
+      documentId: documentId,
+      documentName: `${document.caseNumber}_${document.documentType}.txt`,
+      caseNumber: document.caseNumber,
+      requestedAt: new Date().toLocaleString(),
+      status: 'Downloaded',
+      referenceId: `DOC-DOWNLOAD-${Date.now().toString().slice(-6)}`,
+      action: 'download',
+      processingTime: 'Immediate'
+    };
+    
+    setSubmittedRequests(prev => [newRequest, ...prev]);
+    
+    // Show success message
+    setTimeout(() => {
+      alert(`✅ Document downloaded!\n\nFile: ${document.caseNumber}_${document.documentType}.txt\nReference: ${newRequest.referenceId}\n\nCheck your Downloads folder.`);
+    }, 200);
+  };
+
+  // Updated handleRequestAccess to handle both access request and download
+  const handleRequestAccess = (documentId) => {
+    const document = storedCourtDocuments.find(doc => doc.id === documentId);
+    if (!document) return;
+    
+    if (document.accessLevel === 'public') {
+      // For public documents, directly download
+      handleDownloadDocument(documentId);
+    } else {
+      // For restricted documents, request access
+      const newRequest = {
+        id: Date.now(),
+        service: 'Search Document',
+        documentId: documentId,
+        documentName: document.fileName,
+        caseNumber: document.caseNumber,
+        requestedAt: new Date().toLocaleString(),
+        status: 'Pending Approval',
+        referenceId: `DOC-REQ-${Date.now().toString().slice(-6)}`,
+        formData: { ...formData },
+        processingTime: '1-2 business days',
+        action: 'access_request'
+      };
+      
+      setSubmittedRequests(prev => [newRequest, ...prev]);
+      
+      alert(`Access request submitted for ${document.fileName}\n\nReference ID: ${newRequest.referenceId}\n\nYour request will be reviewed within 1-2 business days.`);
+    }
+  };
+
   // Search function for document search
   const handleSearchDocuments = () => {
     if (!formData.searchCaseNumber && !formData.searchKeywords) {
@@ -672,38 +802,10 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       if (results.length === 0) {
         alert('No documents found matching your search criteria.');
       } else {
-        // Auto-advance to step 2 if results found
-        if (step === 1 && results.length > 0) {
-          setStep(2);
-        }
+        // Auto-advance to step 2
+        setStep(2);
       }
-    }, 1500);
-  };
-
-  const handleRequestAccess = (documentId) => {
-    const document = storedCourtDocuments.find(doc => doc.id === documentId);
-    if (!document) return;
-    
-    const newRequest = {
-      id: Date.now(),
-      service: 'Search Document',
-      documentId: documentId,
-      documentName: document.fileName,
-      caseNumber: document.caseNumber,
-      requestedAt: new Date().toLocaleString(),
-      status: document.accessLevel === 'public' ? 'Access Granted' : 'Pending Approval',
-      referenceId: `DOC-REQ-${Date.now().toString().slice(-6)}`,
-      formData: { ...formData },
-      processingTime: document.accessLevel === 'public' ? 'Immediate' : '1-2 business days'
-    };
-    
-    setSubmittedRequests(prev => [newRequest, ...prev]);
-    
-    if (document.accessLevel === 'public') {
-      alert(`Access granted to ${document.fileName}\nYou can now view and download this document.`);
-    } else {
-      alert(`Request submitted for ${document.fileName}\nReference ID: ${newRequest.referenceId}\nYour request will be reviewed within 1-2 business days.`);
-    }
+    }, 1000);
   };
 
   // New function to view appointment details
@@ -804,112 +906,122 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     alert(`${service.name} submitted successfully!\nReference ID: ${newRequest.referenceId}`);
   };
 
-  const renderDocumentSidebar = () => {
-    // Don't render sidebar for Daily Appointment
-    if (service.name === 'Daily Appointment') {
-      return null;
+  // Handle continue button for search document
+  const handleContinue = () => {
+    if (service.name === 'Search Document' && step === 1) {
+      // In step 1, we need to perform search first
+      if (!formData.searchCaseNumber && !formData.searchKeywords) {
+        alert('Please enter search criteria first');
+        return;
+      }
+      handleSearchDocuments();
+    } else {
+      setStep(step + 1);
     }
-    
-    return (
-      <div className="documents-sidebar">
-        <div className="sidebar-section">
-          <div className="section-header">
-            <div className="section-icon">📂</div>
-            <h3>Uploaded Documents</h3>
+  };
+
+  const renderDocumentSidebar = () => (
+    <div className="documents-sidebar">
+      <div className="sidebar-section">
+        <div className="section-header">
+          <div className="section-icon">📂</div>
+          <h3>Uploaded Documents</h3>
+        </div>
+        {uploadedFiles.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📎</div>
+            <p>No documents uploaded yet</p>
           </div>
-          {uploadedFiles.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📎</div>
-              <p>No documents uploaded yet</p>
-            </div>
-          ) : (
-            <div className="uploaded-files-sidebar">
-              {uploadedFiles.map(file => (
-                <div key={file.id} className="file-item-sidebar">
-                  <div className="file-icon">
-                    {file.type.includes('pdf') ? '📄' : 
-                     file.type.includes('image') ? '🖼️' : 
-                     file.type.includes('word') ? '📝' : '📎'}
+        ) : (
+          <div className="uploaded-files-sidebar">
+            {uploadedFiles.map(file => (
+              <div key={file.id} className="file-item-sidebar">
+                <div className="file-icon">
+                  {file.type.includes('pdf') ? '📄' : 
+                   file.type.includes('image') ? '🖼️' : 
+                   file.type.includes('word') ? '📝' : '📎'}
+                </div>
+                <div className="file-info-sidebar">
+                  <strong className="file-name">{file.name}</strong>
+                  <div className="file-meta">
+                    <span className="file-size">{formatFileSize(file.size)}</span>
+                    <span className="file-date">{file.uploadedAt.split(',')[0]}</span>
                   </div>
-                  <div className="file-info-sidebar">
-                    <strong className="file-name">{file.name}</strong>
-                    <div className="file-meta">
-                      <span className="file-size">{formatFileSize(file.size)}</span>
-                      <span className="file-date">{file.uploadedAt.split(',')[0]}</span>
+                </div>
+                <button 
+                  className="btn-icon remove-btn" 
+                  onClick={() => handleRemoveFile(file.id)}
+                  title="Remove"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="sidebar-section">
+        <div className="section-header">
+          <div className="section-icon">✅</div>
+          <h3>Submitted Requests</h3>
+        </div>
+        {submittedRequests.filter(req => req.service === service.name).length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📋</div>
+            <p>No requests submitted yet</p>
+          </div>
+        ) : (
+          <div className="submitted-requests">
+            {submittedRequests
+              .filter(req => req.service === service.name)
+              .slice(0, 5) // Show only latest 5
+              .map(request => (
+                <div key={request.id} className="request-item">
+                  <div className="request-header">
+                    <span className="request-ref">{request.referenceId}</span>
+                    <span className={`request-status ${request.status.toLowerCase().replace(' ', '-')}`}>
+                      {request.status}
+                    </span>
+                  </div>
+                  <div className="request-meta">
+                    <span>{request.submittedAt || request.requestedAt}</span>
+                    <span className="request-action">
+                      {request.action === 'download' ? '📥 Downloaded' : '📋 Requested'}
+                    </span>
+                  </div>
+                  {request.documentName && (
+                    <div className="request-preview">
+                      <span className="file-preview-item">📄 {request.documentName}</span>
                     </div>
-                  </div>
-                  <button 
-                    className="btn-icon remove-btn" 
-                    onClick={() => handleRemoveFile(file.id)}
-                    title="Remove"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                  </button>
+                  )}
+                  {request.caseNumber && (
+                    <div className="request-case">
+                      <span>Case: {request.caseNumber}</span>
+                    </div>
+                  )}
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-
-        <div className="sidebar-section">
-          <div className="section-header">
-            <div className="section-icon">✅</div>
-            <h3>Submitted Requests</h3>
           </div>
-          {submittedRequests.filter(req => req.service === service.name).length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📋</div>
-              <p>No requests submitted yet</p>
-            </div>
-          ) : (
-            <div className="submitted-requests">
-              {submittedRequests
-                .filter(req => req.service === service.name)
-                .map(request => (
-                  <div key={request.id} className="request-item">
-                    <div className="request-header">
-                      <span className="request-ref">{request.referenceId}</span>
-                      <span className={`request-status ${request.status.toLowerCase().replace(' ', '-')}`}>
-                        {request.status}
-                      </span>
-                    </div>
-                    <div className="request-meta">
-                      <span>{request.submittedAt || request.requestedAt}</span>
-                      <span>{request.files?.length || 0} files</span>
-                    </div>
-                    {request.documentName && (
-                      <div className="request-preview">
-                        <span className="file-preview-item">📄 {request.documentName}</span>
-                      </div>
-                    )}
-                    {request.caseNumber && (
-                      <div className="request-case">
-                        <span>Case: {request.caseNumber}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    );
-  };
+    </div>
+  );
 
   const renderStep1Content = () => {
     if (service.name === 'Daily Appointment') {
       const filteredAppointments = filterAppointmentsByDate(formData.viewDate);
       
       return (
-        <div className="step-content full-page-content">
+        <div className="step-content">
           <div className="step-header">
             <h2>Daily Appointments</h2>
             <p className="step-description">View court appointments for the selected date</p>
           </div>
           
-          <div className="section-card full-page-card">
+          <div className="section-card">
             <div className="appointments-header">
               <h3>Court Appointments Schedule</h3>
               <div className="date-filter">
@@ -962,13 +1074,13 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
             </div>
             
             {filteredAppointments.length === 0 ? (
-              <div className="empty-state full-page-empty">
+              <div className="empty-state">
                 <div className="empty-icon">📅</div>
                 <h4>No appointments scheduled</h4>
                 <p>No court appointments found for the selected date.</p>
               </div>
             ) : (
-              <div className="appointments-list full-page-list">
+              <div className="appointments-list">
                 <div className="list-header">
                   <div className="header-cell time-column">Time</div>
                   <div className="header-cell case-column">Case</div>
@@ -1016,7 +1128,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
             )}
           </div>
           
-          <div className="section-card full-page-card">
+          <div className="section-card">
             <h3>Court Schedule Information</h3>
             <div className="schedule-info">
               <div className="info-item">
@@ -1375,6 +1487,139 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
   };
 
   const renderStep2Content = () => {
+    if (service.name === 'Daily Appointment' && selectedAppointment) {
+      return (
+        <div className="step-content">
+          <div className="step-header">
+            <h2>Appointment Details</h2>
+            <p className="step-description">Detailed information about the court appointment</p>
+            <button 
+              className="btn-secondary btn-back"
+              onClick={() => {
+                setSelectedAppointment(null);
+                setStep(1);
+              }}
+            >
+              ← Back to Appointments List
+            </button>
+          </div>
+          
+          <div className="appointment-details-container">
+            <div className="section-card">
+              <div className="appointment-header">
+                <div className="appointment-badge">
+                  <span className="badge-icon">⚖️</span>
+                  <span className="badge-text">{selectedAppointment.purpose}</span>
+                </div>
+                <div className="appointment-status">
+                  <span className={`status-large status-${selectedAppointment.status.toLowerCase().replace(' ', '-')}`}>
+                    {selectedAppointment.status}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="appointment-info-grid">
+                <div className="info-card">
+                  <h4>Case Information</h4>
+                  <div className="info-list">
+                    <div className="info-item">
+                      <span className="info-label">Case Number:</span>
+                      <span className="info-value">{selectedAppointment.caseNumber}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Case Title:</span>
+                      <span className="info-value">{selectedAppointment.caseTitle}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Purpose:</span>
+                      <span className="info-value">{selectedAppointment.purpose}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="info-card">
+                  <h4>Schedule Details</h4>
+                  <div className="info-list">
+                    <div className="info-item">
+                      <span className="info-label">Date:</span>
+                      <span className="info-value">{selectedAppointment.scheduledDate}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Time:</span>
+                      <span className="info-value">{selectedAppointment.scheduledTime}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Duration:</span>
+                      <span className="info-value">{selectedAppointment.duration}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="info-card">
+                  <h4>Court Information</h4>
+                  <div className="info-list">
+                    <div className="info-item">
+                      <span className="info-label">Court Room:</span>
+                      <span className="info-value">{selectedAppointment.courtRoom}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Presiding Judge:</span>
+                      <span className="info-value">{selectedAppointment.judge}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="info-card">
+                  <h4>Parties Involved</h4>
+                  <div className="info-list">
+                    <div className="info-item">
+                      <span className="info-label">Parties:</span>
+                      <span className="info-value">
+                        {selectedAppointment.parties.join(', ')}
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Representing Lawyer:</span>
+                      <span className="info-value">{selectedAppointment.lawyer}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="notes-section">
+                <h4>Notes & Additional Information</h4>
+                <div className="notes-content">
+                  <p>{selectedAppointment.notes}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="section-card">
+              <h3>Related Information</h3>
+              <div className="related-links">
+                <button className="related-link">
+                  <span className="link-icon">📄</span>
+                  <span className="link-text">View Case Documents</span>
+                </button>
+                <button className="related-link">
+                  <span className="link-icon">📍</span>
+                  <span className="link-text">Court Location Map</span>
+                </button>
+                <button className="related-link">
+                  <span className="link-icon">📋</span>
+                  <span className="link-text">Courtroom Procedures</span>
+                </button>
+                <button className="related-link">
+                  <span className="link-icon">📞</span>
+                  <span className="link-text">Contact Court Clerk</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     if (service.name === 'Search Document') {
       return (
         <div className="step-content">
@@ -1492,14 +1737,26 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
                       <div className="action-buttons">
                         <button 
                           className="btn-secondary"
-                          onClick={() => alert(`Preview functionality would open ${doc.fileName}`)}
+                          onClick={() => {
+                            // Show preview in alert
+                            alert(`PREVIEW: ${doc.fileName}\n\nCase: ${doc.caseNumber}\nTitle: ${doc.caseTitle}\nDescription: ${doc.description}\n\nThis is a preview of the document content.`);
+                          }}
                         >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
                           Preview
                         </button>
                         <button 
                           className={`btn-primary ${doc.accessLevel === 'public' ? '' : 'btn-restricted'}`}
                           onClick={() => handleRequestAccess(doc.id)}
                         >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                          </svg>
                           {doc.accessLevel === 'public' ? 'Download' : 'Request Access'}
                         </button>
                       </div>
@@ -1671,139 +1928,6 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       );
     }
     
-    if (service.name === 'Daily Appointment' && selectedAppointment) {
-      return (
-        <div className="step-content full-page-content">
-          <div className="step-header">
-            <h2>Appointment Details</h2>
-            <p className="step-description">Detailed information about the court appointment</p>
-            <button 
-              className="btn-secondary btn-back"
-              onClick={() => {
-                setSelectedAppointment(null);
-                setStep(1);
-              }}
-            >
-              ← Back to Appointments List
-            </button>
-          </div>
-          
-          <div className="appointment-details-container">
-            <div className="section-card full-page-card">
-              <div className="appointment-header">
-                <div className="appointment-badge">
-                  <span className="badge-icon">⚖️</span>
-                  <span className="badge-text">{selectedAppointment.purpose}</span>
-                </div>
-                <div className="appointment-status">
-                  <span className={`status-large status-${selectedAppointment.status.toLowerCase().replace(' ', '-')}`}>
-                    {selectedAppointment.status}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="appointment-info-grid">
-                <div className="info-card">
-                  <h4>Case Information</h4>
-                  <div className="info-list">
-                    <div className="info-item">
-                      <span className="info-label">Case Number:</span>
-                      <span className="info-value">{selectedAppointment.caseNumber}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Case Title:</span>
-                      <span className="info-value">{selectedAppointment.caseTitle}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Purpose:</span>
-                      <span className="info-value">{selectedAppointment.purpose}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="info-card">
-                  <h4>Schedule Details</h4>
-                  <div className="info-list">
-                    <div className="info-item">
-                      <span className="info-label">Date:</span>
-                      <span className="info-value">{selectedAppointment.scheduledDate}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Time:</span>
-                      <span className="info-value">{selectedAppointment.scheduledTime}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Duration:</span>
-                      <span className="info-value">{selectedAppointment.duration}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="info-card">
-                  <h4>Court Information</h4>
-                  <div className="info-list">
-                    <div className="info-item">
-                      <span className="info-label">Court Room:</span>
-                      <span className="info-value">{selectedAppointment.courtRoom}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Presiding Judge:</span>
-                      <span className="info-value">{selectedAppointment.judge}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="info-card">
-                  <h4>Parties Involved</h4>
-                  <div className="info-list">
-                    <div className="info-item">
-                      <span className="info-label">Parties:</span>
-                      <span className="info-value">
-                        {selectedAppointment.parties.join(', ')}
-                      </span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Representing Lawyer:</span>
-                      <span className="info-value">{selectedAppointment.lawyer}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="notes-section">
-                <h4>Notes & Additional Information</h4>
-                <div className="notes-content">
-                  <p>{selectedAppointment.notes}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="section-card full-page-card">
-              <h3>Related Information</h3>
-              <div className="related-links">
-                <button className="related-link">
-                  <span className="link-icon">📄</span>
-                  <span className="link-text">View Case Documents</span>
-                </button>
-                <button className="related-link">
-                  <span className="link-icon">📍</span>
-                  <span className="link-text">Court Location Map</span>
-                </button>
-                <button className="related-link">
-                  <span className="link-icon">📋</span>
-                  <span className="link-text">Courtroom Procedures</span>
-                </button>
-                <button className="related-link">
-                  <span className="link-icon">📞</span>
-                  <span className="link-text">Contact Court Clerk</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
     // Step 2 content for other services
     return (
       <div className="step-content">
@@ -1879,7 +2003,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
         )}
 
         {/* Rest of step 2 for other services */}
-        {config.showAppointment && service.name === 'Daily Appointment' && step === 2 && !selectedAppointment && (
+        {config.showAppointment && service.name === 'Daily Appointment' && (
           <div className="form-section">
             <div className="section-card">
               <h3>Schedule Appointment</h3>
@@ -2037,7 +2161,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
           </div>
         )}
 
-        {config.showLocation && service.name === 'Daily Appointment' && step === 2 && !selectedAppointment && (
+        {config.showLocation && service.name === 'Daily Appointment' && (
           <div className="form-section">
             <div className="section-card">
               <h3>Location Information</h3>
@@ -2106,6 +2230,138 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
   };
 
   const renderStep3Content = () => {
+    if (service.name === 'Daily Appointment') {
+      // This would be for scheduling a new appointment
+      return (
+        <div className="step-content">
+          <div className="step-header">
+            <h2>Schedule New Appointment</h2>
+            <p className="step-description">Book a new court appointment</p>
+          </div>
+          
+          <div className="section-card">
+            <h3>Appointment Booking</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Preferred Date *</label>
+                <input 
+                  className="form-input" 
+                  type="date" 
+                  name="appointmentDate" 
+                  onChange={handleInputChange} 
+                  min={new Date().toISOString().split('T')[0]}
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Preferred Time *</label>
+                <select className="form-select" name="appointmentTime" onChange={handleInputChange} required>
+                  <option value="">Select time slot</option>
+                  <option value="09:00">09:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="14:00">02:00 PM</option>
+                  <option value="15:00">03:00 PM</option>
+                  <option value="16:00">04:00 PM</option>
+                </select>
+              </div>
+              <div className="form-group full-width">
+                <label className="form-label">Purpose of Visit *</label>
+                <select className="form-select" name="purpose" onChange={handleInputChange} required>
+                  <option value="">Select purpose</option>
+                  <option value="case_inquiry">Case Inquiry</option>
+                  <option value="document_submission">Document Submission</option>
+                  <option value="hearing">Case Hearing</option>
+                  <option value="consultation">Legal Consultation</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="form-group full-width">
+                <label className="form-label">Case Number (if applicable)</label>
+                <input className="form-input" type="text" name="appointmentCaseNumber" onChange={handleInputChange} placeholder="Enter case number" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="section-card">
+            <h3>Additional Information</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Full Name *</label>
+                <input 
+                  className="form-input" 
+                  type="text" 
+                  name="appointmentName" 
+                  value={formData.appointmentName || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email Address *</label>
+                <input 
+                  className="form-input" 
+                  type="email" 
+                  name="appointmentEmail" 
+                  value={formData.appointmentEmail || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number *</label>
+                <input 
+                  className="form-input" 
+                  type="tel" 
+                  name="appointmentPhone" 
+                  value={formData.appointmentPhone || ''}
+                  onChange={handleInputChange}
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+              <div className="form-group full-width">
+                <label className="form-label">Additional Notes</label>
+                <textarea 
+                  className="form-textarea" 
+                  name="appointmentNotes" 
+                  value={formData.appointmentNotes || ''}
+                  onChange={handleInputChange}
+                  rows="3"
+                  placeholder="Any additional information for the court staff"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          
+          <div className="section-card">
+            <h3>Court Location</h3>
+            <div className="form-grid">
+              <div className="form-group full-width">
+                <label className="form-label">Select Court Location *</label>
+                <select 
+                  className="form-select" 
+                  name="appointmentCourtLocation" 
+                  value={formData.appointmentCourtLocation || ''}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select court location</option>
+                  <option value="main">Main Court Building - 123 Justice Avenue</option>
+                  <option value="north">North Branch Court - 456 North Street</option>
+                  <option value="south">South Branch Court - 789 South Road</option>
+                  <option value="east">East Branch Court - 101 East Avenue</option>
+                  <option value="west">West Branch Court - 202 West Boulevard</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     if (service.name === 'Search Document') {
       const selectedDocs = searchResults.filter(doc => formData[`selectDoc_${doc.id}`]);
       
@@ -2277,101 +2533,6 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
       );
     }
     
-    if (service.name === 'Daily Appointment') {
-      // This would be for scheduling a new appointment
-      return (
-        <div className="step-content full-page-content">
-          <div className="step-header">
-            <h2>Schedule New Appointment</h2>
-            <p className="step-description">Book a new court appointment</p>
-          </div>
-          
-          <div className="section-card full-page-card">
-            <h3>Appointment Booking</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Preferred Date *</label>
-                <input 
-                  className="form-input" 
-                  type="date" 
-                  name="appointmentDate" 
-                  onChange={handleInputChange} 
-                  min={new Date().toISOString().split('T')[0]}
-                  required 
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Preferred Time *</label>
-                <select className="form-select" name="appointmentTime" onChange={handleInputChange} required>
-                  <option value="">Select time slot</option>
-                  <option value="09:00">09:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="14:00">02:00 PM</option>
-                  <option value="15:00">03:00 PM</option>
-                  <option value="16:00">04:00 PM</option>
-                </select>
-              </div>
-              <div className="form-group full-width">
-                <label className="form-label">Purpose of Visit *</label>
-                <select className="form-select" name="purpose" onChange={handleInputChange} required>
-                  <option value="">Select purpose</option>
-                  <option value="case_inquiry">Case Inquiry</option>
-                  <option value="document_submission">Document Submission</option>
-                  <option value="hearing">Case Hearing</option>
-                  <option value="consultation">Legal Consultation</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div className="form-group full-width">
-                <label className="form-label">Case Number (if applicable)</label>
-                <input className="form-input" type="text" name="appointmentCaseNumber" onChange={handleInputChange} placeholder="Enter case number" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="section-card full-page-card">
-            <h3>Contact Information</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Full Name *</label>
-                <input className="form-input" type="text" name="fullName" onChange={handleInputChange} required placeholder="Enter your full name" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Email Address *</label>
-                <input className="form-input" type="email" name="email" onChange={handleInputChange} required placeholder="Enter your email" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Phone Number *</label>
-                <input className="form-input" type="tel" name="phone" onChange={handleInputChange} required placeholder="Enter your phone number" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="confirmation-box">
-            <label className="checkbox-container">
-              <input type="checkbox" id="confirmAppointment" required />
-              <span className="checkmark"></span>
-              <span className="checkbox-label">
-                I confirm that all information provided is accurate and I will attend the appointment at the scheduled time
-              </span>
-            </label>
-          </div>
-          
-          <div className="notice-card">
-            <div className="notice-header">
-              <div className="notice-icon">⚠️</div>
-              <h4>Important Notice</h4>
-            </div>
-            <p className="notice-text">
-              Appointment confirmations will be sent via email/SMS. Please arrive 15 minutes before your scheduled time. 
-              Late arrivals may result in rescheduling. Bring all required documents and identification to your appointment.
-            </p>
-          </div>
-        </div>
-      );
-    }
-    
     return (
       <div className="step-content">
         <div className="step-header">
@@ -2506,104 +2667,45 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     }
   };
 
-  // Render different layouts for Daily Appointment vs other services
-  if (isDailyAppointment) {
-    return (
-      <div className="service-details-container daily-appointment-full-page">
-        <div className="service-header daily-appointment-header">
-          <button className="back-button" onClick={onBack}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  // Render action bar with fixed continue button logic
+  const renderActionBar = () => (
+    <div className="action-bar">
+      <div className="action-left">
+        {step > 1 && (
+          <button className="btn-secondary" onClick={() => setStep(step - 1)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
-            Back to Services
+            Previous
           </button>
-          
-          <div className="service-title-section">
-            <div className="service-badge">{service.name.charAt(0)}</div>
-            <div>
-              <h1 className="service-title">{service.name}</h1>
-              <p className="service-subtitle">
-                {service.description || `Complete your ${service.name.toLowerCase()} request`}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="service-process-wrapper daily-appointment-process">
-          <div className="process-header daily-appointment-process-header">
-            <div className="progress-steps">
-              {steps.map(s => (
-                <div key={s.number} className={`progress-step ${step === s.number ? 'active' : ''} ${step > s.number ? 'completed' : ''}`}>
-                  <div className="step-circle">
-                    {step > s.number ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 6L9 17l-5-5"/>
-                      </svg>
-                    ) : (
-                      <span>{s.number}</span>
-                    )}
-                  </div>
-                  <div className="step-content">
-                    <div className="step-title">{s.title}</div>
-                    <div className="step-description">{s.description}</div>
-                  </div>
-                  {s.number < steps.length && (
-                    <div className="step-connector"></div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="main-content daily-appointment-main-content">
-            <div className="content-wrapper daily-appointment-content-wrapper">
-              {renderServiceSpecificContent()}
-              
-              <div className="action-bar">
-                <div className="action-left">
-                  {step > 1 && (
-                    <button className="btn-secondary" onClick={() => setStep(step - 1)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
-                      </svg>
-                      Previous
-                    </button>
-                  )}
-                </div>
-                <div className="action-right">
-                  {step < steps.length ? (
-                    <button 
-                      className="btn-primary" 
-                      onClick={() => setStep(step + 1)} 
-                      disabled={
-                        (service.name === 'Arbitration Fee' && step === 1 && (!formData.courtCauseType || !formData.claimAmount || !formData.caseTitle)) ||
-                        (service.name === 'Search Document' && step === 1 && (!formData.searchCaseNumber && !formData.searchKeywords))
-                      }
-                    >
-                      Continue
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                      </svg>
-                    </button>
-                  ) : (
-                    <button className="btn-submit" onClick={handleSubmitApplication}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                      </svg>
-                      {service.name === 'Search Document' ? 'Submit Access Requests' : 
-                       service.name === 'Daily Appointment' ? 'Book Appointment' : 'Submit Request'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
-    );
-  }
+      <div className="action-right">
+        {step < steps.length ? (
+          <button 
+            className="btn-primary" 
+            onClick={handleContinue}
+            disabled={
+              (service.name === 'Arbitration Fee' && step === 1 && (!formData.courtCauseType || !formData.claimAmount || !formData.caseTitle))
+            }
+          >
+            {service.name === 'Search Document' && step === 1 ? 'Search Documents' : 'Continue'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        ) : (
+          <button className="btn-submit" onClick={handleSubmitApplication}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+            {service.name === 'Search Document' ? 'Submit Access Requests' : 'Submit Request'}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
-  // Regular layout for other services
   return (
     <div className="service-details-container">
       <div className="service-header">
@@ -2656,49 +2758,13 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
             <div className="content-wrapper">
               {renderServiceSpecificContent()}
               
-              <div className="action-bar">
-                <div className="action-left">
-                  {step > 1 && (
-                    <button className="btn-secondary" onClick={() => setStep(step - 1)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
-                      </svg>
-                      Previous
-                    </button>
-                  )}
-                </div>
-                <div className="action-right">
-                  {step < steps.length ? (
-                    <button 
-                      className="btn-primary" 
-                      onClick={() => setStep(step + 1)} 
-                      disabled={
-                        (service.name === 'Arbitration Fee' && step === 1 && (!formData.courtCauseType || !formData.claimAmount || !formData.caseTitle)) ||
-                        (service.name === 'Search Document' && step === 1 && (!formData.searchCaseNumber && !formData.searchKeywords))
-                      }
-                    >
-                      Continue
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                      </svg>
-                    </button>
-                  ) : (
-                    <button className="btn-submit" onClick={handleSubmitApplication}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                      </svg>
-                      {service.name === 'Search Document' ? 'Submit Access Requests' : 
-                       service.name === 'Daily Appointment' ? 'Book Appointment' : 'Submit Request'}
-                    </button>
-                  )}
-                </div>
-              </div>
+              {renderActionBar()}
             </div>
           </div>
 
           <div className="sidebar">
             {renderDocumentSidebar()}
-          </div>  
+          </div>
         </div>
       </div>
     </div>
