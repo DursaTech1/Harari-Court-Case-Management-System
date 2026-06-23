@@ -284,3 +284,16 @@ User
 
 *Harari Region Supreme Court — Digital Services Portal*  
 *"ቀልጣፋና ዉጤታማ ለሆነ የዳኝነት አገልግሎት እንተጋለን!" — We strive for efficient and effective judicial services*
+
+<img width="955" height="539" alt="image" src="https://github.com/user-attachments/assets/82f5e58e-d55a-42fc-8f3f-032d20116c8e" />
+<img width="959" height="539" alt="image" src="https://github.com/user-attachments/assets/49c02474-e0d8-4735-8507-af153bcbc8fe" />
+<img width="959" height="488" alt="image" src="https://github.com/user-attachments/assets/112cbd9a-2d41-4fbd-b717-c803ef2293d6" />
+<img width="959" height="537" alt="image" src="https://github.com/user-attachments/assets/5a311531-c92d-4199-b3b3-c2df11b40c87" />
+<img width="955" height="539" alt="image" src="https://github.com/user-attachments/assets/c12f29f5-acdf-4f2f-8327-c3c0f6bf97ca" />
+<img width="955" height="539" alt="image" src="https://github.com/user-attachments/assets/e52d90d3-8d9b-4254-bce5-af75e2d237bd" />
+<img width="959" height="539" alt="image" src="https://github.com/user-attachments/assets/5f5eab1b-7cf6-406b-916b-0fe82a825f82" />
+<img width="958" height="539" alt="image" src="https://github.com/user-attachments/assets/992424ac-97a9-4f36-a383-51ebb3d0ca12" />
+<img width="945" height="539" alt="image" src="https://github.com/user-attachments/assets/2a2791b8-6fa3-4420-bf5c-7ad2b061b60e" />
+
+
+
