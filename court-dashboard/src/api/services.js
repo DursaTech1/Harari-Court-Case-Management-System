@@ -1,6 +1,16 @@
 import api from './axios';
 
 export const servicesAPI = {
+  // Backend route: POST /api/services/services/submit/
+  submitServiceRequest: async (formPayload) => {
+    const response = await api.post('/services/submit/', formPayload, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  // ---------- Stubs — add backend routes to enable these ----------
+
   getCases: async (params = {}) => {
     const response = await api.get('/services/cases/', { params });
     return response.data;
@@ -23,10 +33,7 @@ export const servicesAPI = {
 
   uploadDocument: async (documentData) => {
     const formData = new FormData();
-    Object.keys(documentData).forEach(key => {
-      formData.append(key, documentData[key]);
-    });
-    
+    Object.keys(documentData).forEach((key) => formData.append(key, documentData[key]));
     const response = await api.post('/services/documents/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -35,11 +42,6 @@ export const servicesAPI = {
 
   getHearings: async (caseId) => {
     const response = await api.get('/services/hearings/', { params: { case_id: caseId } });
-    return response.data;
-  },
-
-  getServices: async (params = {}) => {
-    const response = await api.get('/services/services/', { params });
     return response.data;
   },
 

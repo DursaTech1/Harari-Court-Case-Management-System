@@ -1,4 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import {
+  submitDocumentSubmission,
+  submitArbitrationFee,
+  submitDocumentSearch,
+  submitAppointment,
+  submitComplaint,
+  submitFeedback,
+} from '../../api/api';
 import './ServiceDetails.css';
 
 const ServiceDetails = ({ service, onStartService, onBack }) => {
@@ -544,18 +552,7 @@ const ServiceDetails = ({ service, onStartService, onBack }) => {
     }
   }, [formData.courtCauseType, formData.claimAmount, service.name]);
 
-  // Load submitted requests from localStorage on component mount
-  useEffect(() => {
-    const savedRequests = localStorage.getItem('submittedRequests');
-    if (savedRequests) {
-      setSubmittedRequests(JSON.parse(savedRequests));
-    }
-  }, []);
-
-  // Save submitted requests to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('submittedRequests', JSON.stringify(submittedRequests));
-  }, [submittedRequests]);
+  // Submitted requests are now stored in the backend — no localStorage needed.
 
   const handleFileSelect = () => {
     if (config.showDocumentUpload) {
@@ -822,88 +819,127 @@ Document ID: ${document.id}
     return mockAppointments.filter(apt => apt.scheduledDate === date);
   };
 
-  const handleSubmitApplication = () => {
-    if (service.name === 'Arbitration Fee') {
-      if (!formData.courtCauseType) {
-        alert('Please select the type of court case.');
-        return;
-      }
-      if (!formData.claimAmount) {
-        alert('Please enter the claim amount.');
-        return;
-      }
-      if (!formData.caseTitle) {
-        alert('Please enter the case title.');
-        return;
-      }
-    }
+  const handleSubmitApplication = async () => {
+    try {
+      let result;
 
-    if (service.name === 'Search Document') {
-      if (searchResults.length === 0 && step === 2) {
-        alert('Please search for documents first.');
+      if (service.name === 'Document Submission') {
+        if (uploadedFiles.length === 0) {
+          alert('Please upload at least one document before submitting.');
+          return;
+        }
+        result = await submitDocumentSubmission(
+          {
+            case_number: formData.caseNumber || '',
+            document_type: formData.documentType || '',
+            description: formData.description || '',
+          },
+          uploadedFiles
+        );
+
+      } else if (service.name === 'Arbitration Fee') {
+        if (!formData.courtCauseType) { alert('Please select the type of court case.'); return; }
+        if (!formData.claimAmount) { alert('Please enter the claim amount.'); return; }
+        if (!formData.caseTitle) { alert('Please enter the case title.'); return; }
+        const claimNumeric = parseFloat(String(formData.claimAmount).replace(/,/g, '')) || 0;
+        result = await submitArbitrationFee({
+          court_cause_type: formData.courtCauseType,
+          case_title: formData.caseTitle,
+          claim_amount: claimNumeric,
+          calculated_fee: paymentAmount + 50,
+        });
+
+      } else if (service.name === 'Search Document') {
+        const selectedDocs = searchResults.filter(doc => formData[`selectDoc_${doc.id}`]);
+        if (selectedDocs.length === 0) {
+          alert('Please select at least one document to request access.');
+          return;
+        }
+        // Log locally too so user sees feedback before API returns
+        selectedDocs.forEach(doc => handleRequestAccess(doc.id));
+        result = await submitDocumentSearch({
+          search_case_number: formData.searchCaseNumber || '',
+          search_keywords: formData.searchKeywords || '',
+          search_document_type: formData.searchDocumentType || '',
+          search_case_year: formData.searchCaseYear || '',
+          requested_document_ids: selectedDocs.map(d => d.id),
+        });
+        setSearchResults([]);
+        setFormData({});
+        setStep(1);
+        alert(`Search request saved!\nReference ID: ${result.reference_id}`);
+        return;
+
+      } else if (service.name === 'Daily Appointment') {
+        if (!formData.appointmentDate || !formData.appointmentTime) {
+          alert('Please select both date and time for the appointment.');
+          return;
+        }
+        result = await submitAppointment({
+          appointment_date: formData.appointmentDate,
+          appointment_time: formData.appointmentTime,
+          purpose: formData.appointmentPurpose || 'other',
+          case_number: formData.caseNumber || '',
+          notes: formData.notes || '',
+        });
+
+      } else if (service.name === 'Complaint Form') {
+        if (!formData.complaintDescription) {
+          alert('Please describe your complaint in detail.');
+          return;
+        }
+        result = await submitComplaint(
+          {
+            complaint_type: formData.complaintType || '',
+            against_whom: formData.againstWhom || '',
+            complaint_description: formData.complaintDescription,
+            desired_resolution: formData.desiredResolution || '',
+          },
+          uploadedFiles
+        );
+
+      } else if (service.name === 'FeedBack' || service.name === 'Feedback') {
+        if (feedbackRating === 0) {
+          alert('Please provide a rating for the service.');
+          return;
+        }
+        result = await submitFeedback({
+          service_name: formData.feedbackService || 'General',
+          rating: feedbackRating,
+          comments: formData.comments || '',
+          suggestions: formData.suggestions || '',
+        });
+
+      } else {
+        alert('Unknown service. Please contact support.');
         return;
       }
-      
-      // For search document, we submit document access requests
-      const selectedDocs = searchResults.filter(doc => formData[`selectDoc_${doc.id}`]);
-      if (selectedDocs.length === 0) {
-        alert('Please select at least one document to request access.');
-        return;
-      }
-      
-      selectedDocs.forEach(doc => {
-        handleRequestAccess(doc.id);
-      });
-      
-      setSearchResults([]);
+
+      // Local optimistic update so the history panel reflects immediately
+      const newRequest = {
+        id: result.id || Date.now(),
+        service: service.name,
+        submittedAt: new Date().toLocaleString(),
+        status: result.status || 'Submitted',
+        referenceId: result.reference_id,
+        processingTime: config.processingTime,
+      };
+      setSubmittedRequests(prev => [newRequest, ...prev]);
+      setUploadedFiles([]);
       setFormData({});
+      setFeedbackRating(0);
+      setPaymentAmount(0);
       setStep(1);
-      return;
+
+      alert(`✅ ${service.name} submitted successfully!\nReference ID: ${result.reference_id}`);
+
+    } catch (error) {
+      console.error('Submission error:', error);
+      const msg = error.response?.data
+        ? JSON.stringify(error.response.data)
+        : error.message;
+      alert(`❌ Submission failed:\n${msg}`);
     }
-
-    if (service.name !== 'Arbitration Fee' && config.showDocumentUpload && uploadedFiles.length === 0) {
-      alert('Please upload at least one document before submitting.');
-      return;
-    }
-
-    if (service.name === 'Daily Appointment' && (!formData.appointmentDate || !formData.appointmentTime)) {
-      alert('Please select both date and time for the appointment.');
-      return;
-    }
-
-    if (service.name === 'Complaint Form' && !formData.complaintDescription) {
-      alert('Please describe your complaint in detail.');
-      return;
-    }
-
-    if (service.name === 'Feedback' && feedbackRating === 0) {
-      alert('Please provide a rating for the service.');
-      return;
-    }
-
-    const newRequest = {
-      id: Date.now(),
-      service: service.name,
-      submittedAt: new Date().toLocaleString(),
-      status: 'Submitted',
-      referenceId: `${service.name.slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-8)}`,
-      files: [...uploadedFiles],
-      formData: { ...formData },
-      processingTime: config.processingTime,
-      ...(service.name === 'Arbitration Fee' && { 
-        paymentAmount: paymentAmount + 50,
-        courtCauseType: formData.courtCauseType 
-      })
-    };
-
-    setSubmittedRequests(prev => [newRequest, ...prev]);
-    setUploadedFiles([]);
-    setFormData({});
-    setFeedbackRating(0);
-    setPaymentAmount(0);
-    setStep(1);
-    
-    alert(`${service.name} submitted successfully!\nReference ID: ${newRequest.referenceId}`);
   };
 
   // Handle continue button for search document

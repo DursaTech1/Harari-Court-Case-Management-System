@@ -3,13 +3,14 @@ import ServicesSidebar from './sections/ServicesSidebar';
 import ServiceDetails from './sections/ServiceDetails';
 import CaseAnalytics from './sections/CaseAnalytics';
 import './Dashboard.css';
-import { fetchDashboardData } from '../api/api';
+import { fetchDashboardData, fetchMyRequests } from '../api/api';
 
 const Dashboard = ({ userData, onLogout, userCases }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [viewMode, setViewMode] = useState('dashboard'); // 'dashboard', 'analytics', 'profile'
   const [dashboardData, setDashboardData] = useState(null);
+  const [myRequests, setMyRequests] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -26,8 +27,12 @@ const Dashboard = ({ userData, onLogout, userCases }) => {
 useEffect(() => {
   const loadDashboard = async () => {
     try {
-      const data = await fetchDashboardData();
+      const [data, requests] = await Promise.all([
+        fetchDashboardData(),
+        fetchMyRequests(),
+      ]);
       setDashboardData(data);
+      setMyRequests(requests);
     } catch (error) {
       console.error('Failed to load dashboard data');
     }

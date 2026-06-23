@@ -1,0 +1,288 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}System Overview | {{ site_title }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  /* ── Overview page styles ─────────────────────────── */
+  .overview-wrapper { padding: 24px; }
+
+  .ov-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--body-fg, #fff);
+  }
+  .ov-subtitle {
+    color: #888;
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+
+  /* Stat cards grid */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--darkened-bg, #1e1e2e);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    padding: 22px 20px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, #1a73e8);
+    border-radius: 14px 14px 0 0;
+  }
+  .stat-icon  { font-size: 32px; margin-bottom: 10px; }
+  .stat-value { font-size: 36px; font-weight: 800; line-height: 1; color: var(--body-fg,#fff); }
+  .stat-label { font-size: 12px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: .6px; }
+  .stat-sub   { font-size: 11px; color: #f39c12; margin-top: 6px; }
+
+  /* Accent colours */
+  .c-blue   { --card-accent: #1a73e8; }
+  .c-green  { --card-accent: #27ae60; }
+  .c-orange { --card-accent: #e67e22; }
+  .c-red    { --card-accent: #e74c3c; }
+  .c-purple { --card-accent: #8e44ad; }
+  .c-teal   { --card-accent: #16a085; }
+  .c-yellow { --card-accent: #f1c40f; }
+  .c-pink   { --card-accent: #e91e8c; }
+
+  /* Section headers */
+  .ov-section {
+    background: var(--darkened-bg, #1e1e2e);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 24px;
+  }
+  .ov-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    color: var(--body-fg,#fff);
+  }
+
+  /* Mini tables */
+  .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mini-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .5px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .mini-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    color: var(--body-fg,#ddd);
+    vertical-align: middle;
+  }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .mini-table tr:hover td { background: rgba(255,255,255,.03); }
+
+  /* Status pills */
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .pill-pending    { background: #f39c12; }
+  .pill-approved   { background: #27ae60; }
+  .pill-rejected   { background: #e74c3c; }
+  .pill-submitted  { background: #3498db; }
+  .pill-confirmed  { background: #27ae60; }
+  .pill-cancelled  { background: #95a5a6; }
+  .pill-review     { background: #1a73e8; }
+
+  /* Quick-action buttons */
+  .quick-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+  .qa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity .2s, transform .1s;
+    color: #fff !important;
+  }
+  .qa-btn:hover { opacity: .85; transform: translateY(-1px); }
+  .qa-blue   { background: #1a73e8; }
+  .qa-green  { background: #27ae60; }
+  .qa-orange { background: #e67e22; }
+  .qa-red    { background: #e74c3c; }
+  .qa-purple { background: #8e44ad; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="overview-wrapper">
+
+  <h1 class="ov-title">⚖️ System Overview</h1>
+  <p class="ov-subtitle">Live statistics for the Harari Court Case Management System</p>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <a class="qa-btn qa-blue"   href="/admin/accounts/user/">👥 Manage Users</a>
+    <a class="qa-btn qa-green"  href="/admin/services/documentsubmission/">📄 Submissions</a>
+    <a class="qa-btn qa-orange" href="/admin/services/arbitrationfee/">💰 Fees</a>
+    <a class="qa-btn qa-red"    href="/admin/services/complaintform/">📝 Complaints</a>
+    <a class="qa-btn qa-purple" href="/admin/services/appointment/">📅 Appointments</a>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+    <div class="stat-card c-blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value">{{ stats.users }}</div>
+      <div class="stat-label">Registered Users</div>
+      <div class="stat-sub">{{ stats.active_users }} active</div>
+    </div>
+    <div class="stat-card c-green">
+      <div class="stat-icon">📄</div>
+      <div class="stat-value">{{ stats.submissions }}</div>
+      <div class="stat-label">Document Submissions</div>
+      <div class="stat-sub">{{ stats.pending_subs }} pending</div>
+    </div>
+    <div class="stat-card c-orange">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value">{{ stats.fees }}</div>
+      <div class="stat-label">Arbitration Fees</div>
+      <div class="stat-sub">{{ stats.pending_fees }} pending</div>
+    </div>
+    <div class="stat-card c-teal">
+      <div class="stat-icon">🔍</div>
+      <div class="stat-value">{{ stats.searches }}</div>
+      <div class="stat-label">Document Searches</div>
+    </div>
+    <div class="stat-card c-purple">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value">{{ stats.appointments }}</div>
+      <div class="stat-label">Appointments</div>
+      <div class="stat-sub">{{ stats.pending_apts }} pending</div>
+    </div>
+    <div class="stat-card c-red">
+      <div class="stat-icon">📝</div>
+      <div class="stat-value">{{ stats.complaints }}</div>
+      <div class="stat-label">Complaints</div>
+      <div class="stat-sub">{{ stats.open_complaints }} open</div>
+    </div>
+    <div class="stat-card c-yellow">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-value">{{ stats.feedback }}</div>
+      <div class="stat-label">Feedback Submitted</div>
+      <div class="stat-sub">Avg rating: {{ stats.avg_rating }}/5</div>
+    </div>
+  </div>
+
+  <!-- Three column layout -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
+
+    <!-- Recent Submissions -->
+    <div class="ov-section">
+      <h3>📄 Recent Submissions</h3>
+      {% if recent_submissions %}
+      <table class="mini-table">
+        <thead>
+          <tr><th>Ref</th><th>User</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+        {% for s in recent_submissions %}
+          <tr>
+            <td><a href="/admin/services/documentsubmission/{{ s.id }}/change/" style="color:#1a73e8;text-decoration:none;">{{ s.reference_id }}</a></td>
+            <td>{{ s.user.full_name }}</td>
+            <td>
+              <span class="pill pill-{% if s.status == 'approved' %}approved{% elif s.status == 'rejected' %}rejected{% elif s.status == 'under_review' %}review{% else %}pending{% endif %}">
+                {{ s.status|title }}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:#888;font-size:13px;">No submissions yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Recent Complaints -->
+    <div class="ov-section">
+      <h3>📝 Recent Complaints</h3>
+      {% if recent_complaints %}
+      <table class="mini-table">
+        <thead>
+          <tr><th>Ref</th><th>User</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+        {% for c in recent_complaints %}
+          <tr>
+            <td><a href="/admin/services/complaintform/{{ c.id }}/change/" style="color:#e74c3c;text-decoration:none;">{{ c.reference_id }}</a></td>
+            <td>{{ c.user.full_name }}</td>
+            <td>
+              <span class="pill pill-{% if c.status == 'resolved' %}approved{% elif c.status == 'dismissed' %}rejected{% elif c.status == 'under_review' %}review{% else %}submitted{% endif %}">
+                {{ c.status|title }}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:#888;font-size:13px;">No complaints yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Recent Appointments -->
+    <div class="ov-section">
+      <h3>📅 Recent Appointments</h3>
+      {% if recent_appointments %}
+      <table class="mini-table">
+        <thead>
+          <tr><th>Ref</th><th>User</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+        {% for a in recent_appointments %}
+          <tr>
+            <td><a href="/admin/services/appointment/{{ a.id }}/change/" style="color:#8e44ad;text-decoration:none;">{{ a.reference_id }}</a></td>
+            <td>{{ a.user.full_name }}</td>
+            <td style="font-size:11px;color:#aaa;">{{ a.appointment_date }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:#888;font-size:13px;">No appointments yet.</p>
+      {% endif %}
+    </div>
+
+  </div><!-- end grid -->
+
+</div><!-- end overview-wrapper -->
+{% endblock %}

@@ -136,6 +136,8 @@ function App() {
       setIsLoggedIn(false);
       setUserData(null);
       localStorage.removeItem('harariCourtUser');
+      localStorage.removeItem('token');       // clear JWT token
+      localStorage.removeItem('user');        // clear user from AuthContext
     }
   };
 

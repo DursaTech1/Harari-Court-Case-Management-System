@@ -22,10 +22,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login/`, {
-        username,
+      const response = await axios.post(`${API_URL}/accounts/login/`, {
+        email,
         password,
       });
       
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/register/`, userData);
+      const response = await axios.post(`${API_URL}/accounts/register/`, userData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, error: error.response?.data || error.message };

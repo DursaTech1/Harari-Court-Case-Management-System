@@ -1,19 +1,24 @@
-//ServicesSidebar.jsx
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './ServicesSidebar.css';
+import { fetchCourtServices } from '../../api/api';
 
 const ServicesSidebar = ({ selectedService, onServiceSelect }) => {
-  // Filter or define services based on your needs
-  const services = [
+  const [services, setServices] = useState([
     { id: 1, name: 'Document Submission', icon: '📄' },
-    { id: 2, name: 'Arbitration Fee', icon: '💰' },
-    { id: 3, name: 'Search Document', icon: '🔍' },
-    { id: 4, name: 'Daily Appointment', icon: '📅' },
-    { id: 5, name: 'Complaint Form', icon: '📝' },
-    { id: 6, name: 'FeedBack', icon: '💬' },
-    
-  ];
+    { id: 2, name: 'Arbitration Fee',     icon: '💰' },
+    { id: 3, name: 'Search Document',     icon: '🔍' },
+    { id: 4, name: 'Daily Appointment',   icon: '📅' },
+    { id: 5, name: 'Complaint Form',      icon: '📝' },
+    { id: 6, name: 'FeedBack',            icon: '💬' },
+  ]);
+
+  useEffect(() => {
+    fetchCourtServices()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setServices(data);
+      })
+      .catch(() => { /* keep the hardcoded fallback */ });
+  }, []);
 
   return (
     <aside className="services-sidebar">
